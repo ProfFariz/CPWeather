@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import {
   CategoryScale,
@@ -14,13 +14,16 @@ import {
 import { Line } from 'react-chartjs-2'
 import {
   airBandClasses,
-  dashboardMocks,
   hikeClasses,
-  locations,
   severityClasses,
-  type AirBand,
-  type LocationKey,
 } from './mockData'
+import {
+  locations,
+  type AirBand,
+  type DashboardErrorPayload,
+  type DashboardPayload,
+  type LocationKey,
+} from './shared/dashboard.ts'
 
 ChartJS.register(
   CategoryScale,
@@ -79,7 +82,7 @@ const chartOptions: ChartOptions<'line'> = {
       suggestedMax: 36,
       ticks: {
         color: '#4f655c',
-        callback: (value) => `${value}°`,
+        callback: (value) => `${value}\u00B0`,
         font: {
           family: 'Manrope',
           weight: 600,
@@ -109,9 +112,127 @@ function statusCopy(airBand: AirBand) {
   return 'Reduce long outdoor exposure where possible.'
 }
 
+function sourceLabel(source: DashboardPayload['meta']['source'] | undefined) {
+  if (source === 'live') return 'Live API Data'
+  return 'Mock API Data'
+}
+
+function isDashboardErrorPayload(
+  value: DashboardPayload | DashboardErrorPayload,
+): value is DashboardErrorPayload {
+  return 'error' in value
+}
+
 function App() {
   const [selectedLocation, setSelectedLocation] = useState<LocationKey>('ipoh')
-  const snapshot = dashboardMocks[selectedLocation]
+  const [requestVersion, setRequestVersion] = useState(0)
+  const [payload, setPayload] = useState<DashboardPayload | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function loadDashboard() {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const response = await fetch(`/api/dashboard?location=${selectedLocation}`, {
+          headers: {
+            Accept: 'application/json',
+          },
+          signal: controller.signal,
+        })
+
+        const data = (await response.json()) as DashboardPayload | DashboardErrorPayload
+
+        if (!response.ok || isDashboardErrorPayload(data)) {
+          const message = isDashboardErrorPayload(data)
+            ? data.error.message
+            : 'Dashboard request failed.'
+
+          throw new Error(message)
+        }
+
+        setPayload(data)
+      } catch (loadError) {
+        if (controller.signal.aborted) {
+          return
+        }
+
+        if (loadError instanceof Error) {
+          setError(loadError.message)
+          return
+        }
+
+        setError('Something went wrong while loading dashboard data.')
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadDashboard()
+
+    return () => {
+      controller.abort()
+    }
+  }, [selectedLocation, requestVersion])
+
+  const activeLocations = payload?.locations ?? locations
+
+  if (!payload && isLoading) {
+    return (
+      <div className="relative min-h-screen overflow-hidden text-[#17352d]">
+        <div className="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+          <section className="panel w-full max-w-3xl p-8 text-center sm:p-10">
+            <p className="subtle-label">Booting Dashboard</p>
+            <h1 className="display-face mt-4 text-4xl text-[#102820] sm:text-5xl">
+              Pulling the first dashboard response...
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-emerald-950/70 sm:text-base">
+              We are loading the shared `/api/dashboard` contract now so the UI can stop depending
+              on local mock imports.
+            </p>
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {activeLocations.map((location) => (
+                <div key={location.key} className="value-card h-24 animate-pulse bg-white/55" />
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    )
+  }
+
+  if (!payload) {
+    return (
+      <div className="relative min-h-screen overflow-hidden text-[#17352d]">
+        <div className="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+          <section className="panel w-full max-w-3xl p-8 text-center sm:p-10">
+            <p className="subtle-label">Dashboard Error</p>
+            <h1 className="display-face mt-4 text-4xl text-[#102820] sm:text-5xl">
+              The API contract is wired, but the first fetch did not land.
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-emerald-950/70 sm:text-base">
+              {error ?? 'No dashboard payload is available yet.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => setRequestVersion((version) => version + 1)}
+              className="mt-8 rounded-full bg-[#16392f] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_-18px_rgba(11,37,30,0.9)]"
+            >
+              Try again
+            </button>
+          </section>
+        </div>
+      </div>
+    )
+  }
+
+  const { meta, snapshot } = payload
 
   const tempChartData = {
     labels: snapshot.forecast.map((day) => formatForecastLabel(day.date)),
@@ -148,9 +269,30 @@ function App() {
   const warningCountLabel =
     snapshot.warnings.length === 1 ? '1 active watch' : `${snapshot.warnings.length} active items`
 
+  const isEmptyState = snapshot.forecast.length === 0
+
   return (
     <div className="relative min-h-screen overflow-hidden text-[#17352d]">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
+        {error ? (
+          <div className="panel flex flex-col gap-4 border-amber-900/10 bg-amber-50/85 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="subtle-label text-amber-900/70">Refresh Warning</p>
+              <p className="mt-2 text-sm font-semibold text-amber-950">{error}</p>
+              <p className="mt-1 text-sm text-amber-950/70">
+                Showing the last successful dashboard response while we retry.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setRequestVersion((version) => version + 1)}
+              className="rounded-full bg-[#16392f] px-4 py-2 text-sm font-semibold text-white"
+            >
+              Retry fetch
+            </button>
+          </div>
+        ) : null}
+
         <header className="panel relative overflow-hidden p-6 sm:p-7 lg:p-9">
           <div className="absolute inset-y-0 right-0 hidden w-2/5 rounded-l-[48px] ambient-cut lg:block" />
 
@@ -160,9 +302,14 @@ function App() {
                 <span className="subtle-label rounded-full border border-white/70 bg-white/65 px-3 py-1">
                   Perak Weather + API Dashboard
                 </span>
-                <span className="rounded-full border border-amber-900/10 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-900/75">
-                  Mock UI Mode
+                <span className="rounded-full border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-900/75">
+                  {sourceLabel(meta.source)}
                 </span>
+                {isLoading ? (
+                  <span className="rounded-full border border-white/70 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-950/65">
+                    Refreshing...
+                  </span>
+                ) : null}
               </div>
 
               <div className="mt-5 max-w-3xl">
@@ -170,14 +317,13 @@ function App() {
                   Plan around haze, sudden rain, and the trips people actually take.
                 </h1>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-emerald-950/75 sm:text-lg">
-                  This first screen runs on dummy JSON so we can shape the experience before real
-                  API wiring. The focus stays practical: forecast confidence, AQI, local warnings,
-                  and one fast answer for today’s outdoor plan.
+                  The layout now reads from `/api/dashboard`, so the frontend is already aligned
+                  with the shared backend contract we will reuse for live API aggregation next.
                 </p>
               </div>
 
               <div className="mt-7 flex flex-wrap gap-3">
-                {locations.map((location) => {
+                {activeLocations.map((location) => {
                   const isActive = location.key === selectedLocation
 
                   return (
@@ -221,7 +367,9 @@ function App() {
                 </div>
                 <div className="value-card">
                   <p className="subtle-label">Cache Freshness</p>
-                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">{snapshot.cacheAgeMinutes} min</p>
+                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">
+                    {snapshot.cacheAgeMinutes} min
+                  </p>
                   <p className="mt-1 text-sm text-emerald-950/65">
                     Last refreshed {dayjs(snapshot.updatedAt).format('h:mm A')}
                   </p>
@@ -262,48 +410,66 @@ function App() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="subtle-label">5-Day Forecast</p>
-                <h2 className="display-face mt-2 text-3xl text-[#102820]">Temperature swing for the next five days</h2>
+                <h2 className="display-face mt-2 text-3xl text-[#102820]">
+                  Temperature swing for the next five days
+                </h2>
               </div>
               <p className="max-w-sm text-sm leading-6 text-emerald-950/65">
-                Dummy data for now, but the layout is ready for the OpenWeather 5-day feed and Malaysia warning blend.
+                The endpoint is still mock-backed, but the frontend now behaves like a real API
+                consumer.
               </p>
             </div>
 
-            <div className="mt-6 h-[300px] rounded-[26px] border border-white/70 bg-[#f8f5eb]/85 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] sm:p-5">
-              <Line data={tempChartData} options={chartOptions} />
-            </div>
+            {isEmptyState ? (
+              <div className="mt-6 rounded-[26px] border border-dashed border-emerald-900/15 bg-[#f8f5eb]/85 p-8 text-center">
+                <p className="subtle-label">Forecast Empty</p>
+                <p className="mt-3 text-lg font-semibold text-[#102820]">
+                  No forecast rows were returned for this location.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="mt-6 h-[300px] rounded-[26px] border border-white/70 bg-[#f8f5eb]/85 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] sm:p-5">
+                  <Line data={tempChartData} options={chartOptions} />
+                </div>
 
-            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-              {snapshot.forecast.map((day) => (
-                <article key={day.date} className="forecast-row">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#18382f]">
-                        {formatForecastLabel(day.date)}
-                      </p>
-                      <p className="mt-1 text-sm text-emerald-950/60">{formatForecastDate(day.date)}</p>
-                    </div>
-                    <p className="rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-emerald-950/65">
-                      {day.rainChance}% rain
-                    </p>
-                  </div>
-                  <div className="mt-4 flex items-end gap-2">
-                    <p className="text-3xl font-black text-[#102820]">{day.high}°</p>
-                    <p className="pb-1 text-sm font-semibold text-emerald-950/55">/{day.low}°</p>
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-emerald-950/72">{day.summary}</p>
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-emerald-950/55">
-                      <span>Humidity</span>
-                      <span>{day.humidity}%</span>
-                    </div>
-                    <div className="stat-meter mt-2">
-                      <span style={{ width: `${day.humidity}%` }} />
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                  {snapshot.forecast.map((day) => (
+                    <article key={day.date} className="forecast-row">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#18382f]">
+                            {formatForecastLabel(day.date)}
+                          </p>
+                          <p className="mt-1 text-sm text-emerald-950/60">
+                            {formatForecastDate(day.date)}
+                          </p>
+                        </div>
+                        <p className="rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-emerald-950/65">
+                          {day.rainChance}% rain
+                        </p>
+                      </div>
+                      <div className="mt-4 flex items-end gap-2">
+                        <p className="text-3xl font-black text-[#102820]">{day.high}\u00B0</p>
+                        <p className="pb-1 text-sm font-semibold text-emerald-950/55">
+                          /{day.low}\u00B0
+                        </p>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-emerald-950/72">{day.summary}</p>
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-emerald-950/55">
+                          <span>Humidity</span>
+                          <span>{day.humidity}%</span>
+                        </div>
+                        <div className="stat-meter mt-2">
+                          <span style={{ width: `${day.humidity}%` }} />
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </>
+            )}
           </section>
 
           <div className="grid gap-6">
@@ -325,7 +491,9 @@ function App() {
                     AQI Index
                   </p>
                 </div>
-                <p className="mt-3 text-sm leading-7 text-emerald-950/68">{statusCopy(snapshot.airBand)}</p>
+                <p className="mt-3 text-sm leading-7 text-emerald-950/68">
+                  {statusCopy(snapshot.airBand)}
+                </p>
                 <div className="stat-meter mt-5">
                   <span style={{ width: `${Math.min((snapshot.aqi / 120) * 100, 100)}%` }} />
                 </div>
@@ -334,19 +502,27 @@ function App() {
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <div className="value-card">
                   <p className="subtle-label">PM2.5</p>
-                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">{snapshot.pollutants.pm25} µg/m³</p>
+                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">
+                    {snapshot.pollutants.pm25} ug/m3
+                  </p>
                 </div>
                 <div className="value-card">
                   <p className="subtle-label">PM10</p>
-                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">{snapshot.pollutants.pm10} µg/m³</p>
+                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">
+                    {snapshot.pollutants.pm10} ug/m3
+                  </p>
                 </div>
                 <div className="value-card">
                   <p className="subtle-label">Ozone</p>
-                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">{snapshot.pollutants.o3} µg/m³</p>
+                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">
+                    {snapshot.pollutants.o3} ug/m3
+                  </p>
                 </div>
                 <div className="value-card">
-                  <p className="subtle-label">NO₂</p>
-                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">{snapshot.pollutants.no2} µg/m³</p>
+                  <p className="subtle-label">NO2</p>
+                  <p className="mt-3 text-2xl font-extrabold text-[#102820]">
+                    {snapshot.pollutants.no2} ug/m3
+                  </p>
                 </div>
               </div>
             </section>
@@ -355,7 +531,9 @@ function App() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="subtle-label">Malaysia Warnings</p>
-                  <h2 className="display-face mt-2 text-3xl text-[#102820]">What needs attention today</h2>
+                  <h2 className="display-face mt-2 text-3xl text-[#102820]">
+                    What needs attention today
+                  </h2>
                 </div>
                 <span className="rounded-full border border-white/70 bg-white/70 px-3 py-2 text-sm font-semibold text-emerald-950/72">
                   {warningCountLabel}
@@ -388,21 +566,30 @@ function App() {
         <section className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
           <article className="panel p-6 sm:p-7">
             <p className="subtle-label">Source Blend</p>
-            <h2 className="display-face mt-2 text-3xl text-[#102820]">How the live version will work</h2>
+            <h2 className="display-face mt-2 text-3xl text-[#102820]">
+              How the live version will work
+            </h2>
             <div className="mt-6 space-y-4">
               {[
                 ['OpenWeather 5-day forecast', 'Primary temperature and rain trend for the chart.', 'queued'],
                 ['OpenWeather air pollution', 'AQI plus PM2.5, PM10, O3 and NO2 readout.', 'queued'],
                 ['MET Malaysia warnings', 'Government-issued warning copy for local risk context.', 'must-have'],
               ].map(([title, detail, status]) => (
-                <div key={title} className="flex items-start justify-between gap-4 rounded-[22px] bg-[#f8f5eb]/90 px-4 py-4">
+                <div
+                  key={title}
+                  className="flex items-start justify-between gap-4 rounded-[22px] bg-[#f8f5eb]/90 px-4 py-4"
+                >
                   <div>
                     <p className="font-bold text-[#102820]">{title}</p>
                     <p className="mt-1 text-sm text-emerald-950/65">{detail}</p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] ${
-                    status === 'must-have' ? 'bg-[#18392f] text-emerald-50' : 'bg-emerald-950 text-emerald-50'
-                  }`}>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] ${
+                      status === 'must-have'
+                        ? 'bg-[#18392f] text-emerald-50'
+                        : 'bg-emerald-950 text-emerald-50'
+                    }`}
+                  >
                     {status}
                   </span>
                 </div>
@@ -414,18 +601,33 @@ function App() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="subtle-label">Decision Rule</p>
-                <h2 className="display-face mt-2 text-3xl text-[#102820]">How the hiking tip is decided</h2>
+                <h2 className="display-face mt-2 text-3xl text-[#102820]">
+                  How the hiking tip is decided
+                </h2>
               </div>
               <p className="max-w-md text-sm leading-6 text-emerald-950/65">
-                We are keeping this logic explicit so the final app feels trustworthy instead of mysterious.
+                We are keeping this logic explicit so the final app feels trustworthy instead of
+                mysterious.
               </p>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               {[
-                ['Rule 1', 'Active warning beats everything', 'If there is a meaningful thunderstorm or heavy-rain warning, the answer tilts toward caution or skip.'],
-                ['Rule 2', 'AQI changes the comfort level', 'Moderate air still allows most plans, but a poor reading downgrades long walks or hikes quickly.'],
-                ['Rule 3', 'Rain timing shapes the final call', 'The app should explain when the dry window ends, not just say yes or no.'],
+                [
+                  'Rule 1',
+                  'Active warning beats everything',
+                  'If there is a meaningful thunderstorm or heavy-rain warning, the answer tilts toward caution or skip.',
+                ],
+                [
+                  'Rule 2',
+                  'AQI changes the comfort level',
+                  'Moderate air still allows most plans, but a poor reading downgrades long walks or hikes quickly.',
+                ],
+                [
+                  'Rule 3',
+                  'Rain timing shapes the final call',
+                  'The app should explain when the dry window ends, not just say yes or no.',
+                ],
               ].map(([label, title, detail]) => (
                 <div key={label} className="value-card">
                   <p className="subtle-label">{label}</p>
@@ -436,6 +638,11 @@ function App() {
             </div>
           </article>
         </section>
+
+        <footer className="pb-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-emerald-950/45">
+          Served at {dayjs(meta.servedAt).format('h:mm:ss A')} with a {meta.cacheTtlMinutes}
+          -minute cache target.
+        </footer>
       </div>
     </div>
   )

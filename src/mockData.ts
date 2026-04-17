@@ -1,57 +1,13 @@
-export type LocationKey = 'ipoh' | 'taiping' | 'lumut'
-export type Severity = 'Monitor' | 'Watch' | 'Alert'
-export type AirBand = 'Good' | 'Moderate' | 'Poor'
-export type HikeVerdict = 'Go' | 'Caution' | 'Skip'
-
-export type ForecastDay = {
-  date: string
-  high: number
-  low: number
-  rainChance: number
-  humidity: number
-  summary: string
-}
-
-export type WarningItem = {
-  title: string
-  severity: Severity
-  window: string
-  message: string
-}
-
-export type HikeTip = {
-  target: string
-  verdict: HikeVerdict
-  confidence: number
-  title: string
-  reason: string
-}
-
-export type LocationSnapshot = {
-  label: string
-  district: string
-  updatedAt: string
-  cacheAgeMinutes: number
-  overview: string
-  nextRainWindow: string
-  aqi: number
-  airBand: AirBand
-  pollutants: {
-    pm25: number
-    pm10: number
-    o3: number
-    no2: number
-  }
-  hikeTip: HikeTip
-  warnings: WarningItem[]
-  forecast: ForecastDay[]
-}
-
-export const locations: Array<{ key: LocationKey; label: string }> = [
-  { key: 'ipoh', label: 'Ipoh' },
-  { key: 'taiping', label: 'Taiping' },
-  { key: 'lumut', label: 'Lumut' },
-]
+import {
+  defaultLocationKey,
+  locations,
+  type AirBand,
+  type DashboardPayload,
+  type HikeVerdict,
+  type LocationKey,
+  type LocationSnapshot,
+  type Severity,
+} from './shared/dashboard.ts'
 
 export const dashboardMocks = {
   ipoh: {
@@ -186,4 +142,25 @@ export const hikeClasses: Record<HikeVerdict, string> = {
   Go: 'bg-emerald-50 text-emerald-950 ring-1 ring-emerald-900/10',
   Caution: 'bg-amber-100 text-amber-950 ring-1 ring-amber-900/10',
   Skip: 'bg-rose-100 text-rose-950 ring-1 ring-rose-900/10',
+}
+
+export function getDashboardSnapshot(
+  locationKey: LocationKey = defaultLocationKey,
+): LocationSnapshot {
+  return dashboardMocks[locationKey]
+}
+
+export function buildMockDashboardPayload(
+  locationKey: LocationKey = defaultLocationKey,
+): DashboardPayload {
+  return {
+    locationKey,
+    locations,
+    snapshot: getDashboardSnapshot(locationKey),
+    meta: {
+      source: 'mock',
+      servedAt: new Date().toISOString(),
+      cacheTtlMinutes: 15,
+    },
+  }
 }

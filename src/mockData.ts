@@ -161,6 +161,12 @@ export function buildMockDashboardPayload(
       source: 'mock',
       servedAt: new Date().toISOString(),
       cacheTtlMinutes: 15,
+      providers: {
+        openWeatherForecast: 'mock',
+        openWeatherAir: 'mock',
+        malaysiaForecast: 'mock',
+        malaysiaWarnings: 'mock',
+      },
     },
   }
 }

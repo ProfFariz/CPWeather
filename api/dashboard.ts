@@ -1,4 +1,5 @@
 import { buildMockDashboardPayload } from '../src/mockData.ts'
+import { buildDashboardPayload } from './dashboardService.ts'
 import {
   defaultLocationKey,
   isLocationKey,
@@ -47,11 +48,11 @@ function sendJson(
   res.status(statusCode).json(body)
 }
 
-export default function handler(req: ApiRequest, res: ApiResponse) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900')
 
   if (req.method && req.method !== 'GET') {
-    return sendJson(res, 405, {
+    sendJson(res, 405, {
       error: {
         code: 'METHOD_NOT_ALLOWED',
         message: 'Use GET /api/dashboard?location=ipoh|taiping|lumut.',
@@ -60,13 +61,14 @@ export default function handler(req: ApiRequest, res: ApiResponse) {
         servedAt: new Date().toISOString(),
       },
     })
+    return
   }
 
   const requestedLocation = getRequestedLocation(req)
   const locationKey = requestedLocation ?? defaultLocationKey
 
   if (!isLocationKey(locationKey)) {
-    return sendJson(res, 400, {
+    sendJson(res, 400, {
       error: {
         code: 'INVALID_LOCATION',
         message: `Unknown location "${locationKey}". Use ipoh, taiping, or lumut.`,
@@ -75,7 +77,14 @@ export default function handler(req: ApiRequest, res: ApiResponse) {
         servedAt: new Date().toISOString(),
       },
     })
+    return
   }
 
-  return sendJson(res, 200, buildMockDashboardPayload(locationKey))
+  try {
+    const payload = await buildDashboardPayload(locationKey)
+    sendJson(res, 200, payload)
+    return
+  } catch {
+    sendJson(res, 200, buildMockDashboardPayload(locationKey))
+  }
 }

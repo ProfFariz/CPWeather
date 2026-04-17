@@ -30,6 +30,9 @@ What is already done:
 - shared dashboard response contract created
 - `/api/dashboard` endpoint created
 - frontend now fetches `/api/dashboard`
+- `localStorage` caching added with a 15-minute TTL
+- live Malaysia forecast and warning aggregation added on the server
+- hybrid mode works even without an OpenWeather key
 - loading, error, retry, and empty states added
 - local Vite dev server can serve `/api/dashboard`
 - project passes `pnpm lint`
@@ -37,17 +40,16 @@ What is already done:
 
 What is not done yet:
 
-- real OpenWeather integration
-- real Malaysia weather and warning integration
-- `localStorage` cache with TTL
-- live hiking-decision rules
+- real OpenWeather integration with a local or deployed API key
+- refine the live hiking-decision rules
 - `.env.local` setup for live keys
 - deployment to Vercel
 - final README screenshots and attribution polish
 
 Important note:
 
-- The frontend is already using the API route, but the API route still returns mock data right now.
+- The frontend is already using the API route.
+- The API route can now return `mock`, `hybrid`, or `live` data depending on which providers are available.
 
 ## Stack
 
@@ -85,8 +87,12 @@ Current outdoor examples:
 ```text
 CPWeather/
 |-- api/
-|   `-- dashboard.ts
+|   |-- dashboardService.ts
+|   |-- dashboard.ts
+|   `-- locationConfig.ts
 |-- src/
+|   |-- lib/
+|   |   `-- dashboardCache.ts
 |   |-- shared/
 |   |   `-- dashboard.ts
 |   |-- App.tsx
@@ -126,7 +132,9 @@ GET /api/dashboard?location=lumut
 
 Current behavior:
 
-- returns mock dashboard payload for a valid location
+- returns a dashboard payload for a valid location
+- can blend live Malaysia forecast and warning data into the response
+- falls back safely to mock values when a provider is unavailable
 - defaults to `ipoh` if no location is provided
 - returns `400 INVALID_LOCATION` for unsupported locations
 - returns `405 METHOD_NOT_ALLOWED` for non-GET requests
@@ -200,21 +208,27 @@ pnpm build
 
 ## Environment Variables
 
-Not needed yet for the current mock-backed API route.
+Not required for the current hybrid Malaysia integration, but needed for full OpenWeather live mode.
 
-Planned local env file:
+Local env file:
 
 ```text
 .env.local
 ```
 
-Planned variables:
+Current or planned variables:
 
 ```text
 OPENWEATHER_API_KEY=your_key_here
 ```
 
-More vars may be added later depending on the exact Malaysia API flow.
+Example file:
+
+```text
+.env.example
+```
+
+Malaysia weather data does not need a secret key for the current integration path.
 
 Do not expose secret keys through `VITE_*` variables for production use.
 
@@ -223,6 +237,9 @@ Do not expose secret keys through `VITE_*` variables for production use.
 The app now:
 
 - fetches dashboard data from `/api/dashboard`
+- reuses fresh `localStorage` data for 15 minutes per location
+- falls back to stale cached data if refresh fails
+- can show `mock`, `hybrid`, or `live` source status
 - shows a first-load state while waiting for data
 - shows a retryable error state if the request fails
 - keeps the same main dashboard layout
@@ -232,13 +249,11 @@ The app now:
 
 Recommended build order from here:
 
-1. Add `localStorage` caching with a 10 to 15 minute TTL
-2. Replace mock API response with real OpenWeather + Malaysia API requests
-3. Normalize real responses into the shared dashboard contract
-4. Move hiking logic into a reusable decision function
-5. Add `.env.local` and Vercel environment variables
-6. Deploy to Vercel
-7. Add attribution, screenshots, and final polish
+1. Add your OpenWeather key in `.env.local` to unlock full live mode
+2. Refine the live normalization rules and hiking-decision logic
+3. Add `.env.local` and Vercel environment variables
+4. Deploy to Vercel
+5. Add attribution, screenshots, and final polish
 
 ## Hiking Tip Logic Plan
 
@@ -261,6 +276,12 @@ Planned client cache strategy:
 - refresh in background when stale
 - show stale data notice if live refresh fails
 
+Current implementation:
+
+- 15-minute per-location cache
+- stale cache fallback on fetch failure
+- manual retry can force a fresh network request
+
 ## Deployment Plan
 
 Planned target:
@@ -276,7 +297,7 @@ Planned production model:
 ## Things Not To Forget
 
 - use Node 22, not Node 18
-- the API route is still mock-backed
+- `.env.example` exists, but `.env.local` still needs your real OpenWeather key
 - do not put secret weather keys in frontend `VITE_*` env vars
 - keep the frontend consuming the shared dashboard contract
 - add attribution for any provider that requires it

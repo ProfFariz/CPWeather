@@ -2,7 +2,8 @@ export type LocationKey = 'ipoh' | 'taiping' | 'lumut'
 export type Severity = 'Monitor' | 'Watch' | 'Alert'
 export type AirBand = 'Good' | 'Moderate' | 'Poor'
 export type HikeVerdict = 'Go' | 'Caution' | 'Skip'
-export type DashboardSource = 'mock' | 'live'
+export type DashboardSource = 'mock' | 'hybrid' | 'live'
+export type DashboardProviderSource = 'live' | 'mock' | 'unavailable'
 
 export type ForecastDay = {
   date: string
@@ -59,6 +60,12 @@ export type DashboardMeta = {
   source: DashboardSource
   servedAt: string
   cacheTtlMinutes: number
+  providers: {
+    openWeatherForecast: DashboardProviderSource
+    openWeatherAir: DashboardProviderSource
+    malaysiaForecast: DashboardProviderSource
+    malaysiaWarnings: DashboardProviderSource
+  }
 }
 
 export type DashboardPayload = {

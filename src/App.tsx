@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import {
   CategoryScale,
@@ -24,6 +24,11 @@ import {
   type DashboardPayload,
   type LocationKey,
 } from './shared/dashboard.ts'
+import {
+  DASHBOARD_CACHE_TTL_MINUTES,
+  readDashboardCache,
+  writeDashboardCache,
+} from './lib/dashboardCache.ts'
 
 ChartJS.register(
   CategoryScale,
@@ -114,6 +119,7 @@ function statusCopy(airBand: AirBand) {
 
 function sourceLabel(source: DashboardPayload['meta']['source'] | undefined) {
   if (source === 'live') return 'Live API Data'
+  if (source === 'hybrid') return 'Hybrid API Data'
   return 'Mock API Data'
 }
 
@@ -123,27 +129,116 @@ function isDashboardErrorPayload(
   return 'error' in value
 }
 
+type ClientCacheStatus = 'miss' | 'fresh' | 'network' | 'stale'
+
+type ClientCacheInfo = {
+  status: ClientCacheStatus
+  savedAt: string | null
+}
+
+function cacheStatusLabel(status: ClientCacheStatus) {
+  if (status === 'fresh') return 'Local Cache Hit'
+  if (status === 'network') return 'Fresh Network Fetch'
+  if (status === 'stale') return 'Stale Cache Fallback'
+  return 'No Local Cache'
+}
+
+function cacheStatusClasses(status: ClientCacheStatus) {
+  if (status === 'fresh') {
+    return 'border border-emerald-900/10 bg-emerald-50 text-emerald-900/75'
+  }
+
+  if (status === 'network') {
+    return 'border border-sky-900/10 bg-sky-50 text-sky-900/75'
+  }
+
+  if (status === 'stale') {
+    return 'border border-amber-900/10 bg-amber-50 text-amber-900/75'
+  }
+
+  return 'border border-white/70 bg-white/75 text-emerald-950/65'
+}
+
+function cacheSummary(cacheInfo: ClientCacheInfo) {
+  if (!cacheInfo.savedAt) {
+    return `Frontend cache TTL: ${DASHBOARD_CACHE_TTL_MINUTES} minutes.`
+  }
+
+  if (cacheInfo.status === 'fresh') {
+    return `Local cache reused from ${dayjs(cacheInfo.savedAt).format('h:mm A')} with a ${DASHBOARD_CACHE_TTL_MINUTES}-minute TTL.`
+  }
+
+  if (cacheInfo.status === 'network') {
+    return `Most recent response cached locally at ${dayjs(cacheInfo.savedAt).format('h:mm A')} with a ${DASHBOARD_CACHE_TTL_MINUTES}-minute TTL.`
+  }
+
+  if (cacheInfo.status === 'stale') {
+    return `Using cached data saved at ${dayjs(cacheInfo.savedAt).format('h:mm A')} while waiting for a newer response.`
+  }
+
+  return `Frontend cache TTL: ${DASHBOARD_CACHE_TTL_MINUTES} minutes.`
+}
+
 function App() {
   const [selectedLocation, setSelectedLocation] = useState<LocationKey>('ipoh')
   const [requestVersion, setRequestVersion] = useState(0)
   const [payload, setPayload] = useState<DashboardPayload | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [cacheInfo, setCacheInfo] = useState<ClientCacheInfo>({
+    status: 'miss',
+    savedAt: null,
+  })
+  const forceRefreshRef = useRef(false)
 
   useEffect(() => {
     const controller = new AbortController()
 
     async function loadDashboard() {
+      const shouldBypassCache = forceRefreshRef.current
+      forceRefreshRef.current = false
+      const cachedDashboard = readDashboardCache(selectedLocation)
+
+      if (!shouldBypassCache && cachedDashboard?.isFresh) {
+        setPayload(cachedDashboard.payload)
+        setError(null)
+        setIsLoading(false)
+        setCacheInfo({
+          status: 'fresh',
+          savedAt: cachedDashboard.savedAt,
+        })
+        return
+      }
+
+      if (cachedDashboard) {
+        setPayload(cachedDashboard.payload)
+        setCacheInfo({
+          status: 'stale',
+          savedAt: cachedDashboard.savedAt,
+        })
+      } else {
+        setCacheInfo({
+          status: 'miss',
+          savedAt: null,
+        })
+        setPayload((currentPayload) =>
+          currentPayload?.locationKey === selectedLocation ? currentPayload : null,
+        )
+      }
+
       setIsLoading(true)
       setError(null)
 
       try {
-        const response = await fetch(`/api/dashboard?location=${selectedLocation}`, {
-          headers: {
-            Accept: 'application/json',
+        const response = await fetch(
+          `/api/dashboard?location=${encodeURIComponent(selectedLocation)}`,
+          {
+            headers: {
+              Accept: 'application/json',
+            },
+            signal: controller.signal,
           },
-          signal: controller.signal,
-        })
+        )
 
         const data = (await response.json()) as DashboardPayload | DashboardErrorPayload
 
@@ -156,9 +251,22 @@ function App() {
         }
 
         setPayload(data)
+        const cachedRecord = writeDashboardCache(selectedLocation, data)
+        setCacheInfo({
+          status: 'network',
+          savedAt: cachedRecord?.savedAt ?? new Date().toISOString(),
+        })
       } catch (loadError) {
         if (controller.signal.aborted) {
           return
+        }
+
+        if (cachedDashboard) {
+          setPayload(cachedDashboard.payload)
+          setCacheInfo({
+            status: 'stale',
+            savedAt: cachedDashboard.savedAt,
+          })
         }
 
         if (loadError instanceof Error) {
@@ -180,6 +288,11 @@ function App() {
       controller.abort()
     }
   }, [selectedLocation, requestVersion])
+
+  function retryFetch() {
+    forceRefreshRef.current = true
+    setRequestVersion((version) => version + 1)
+  }
 
   const activeLocations = payload?.locations ?? locations
 
@@ -221,7 +334,7 @@ function App() {
             </p>
             <button
               type="button"
-              onClick={() => setRequestVersion((version) => version + 1)}
+              onClick={retryFetch}
               className="mt-8 rounded-full bg-[#16392f] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_-18px_rgba(11,37,30,0.9)]"
             >
               Try again
@@ -285,7 +398,7 @@ function App() {
             </div>
             <button
               type="button"
-              onClick={() => setRequestVersion((version) => version + 1)}
+              onClick={retryFetch}
               className="rounded-full bg-[#16392f] px-4 py-2 text-sm font-semibold text-white"
             >
               Retry fetch
@@ -305,6 +418,9 @@ function App() {
                 <span className="rounded-full border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-900/75">
                   {sourceLabel(meta.source)}
                 </span>
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${cacheStatusClasses(cacheInfo.status)}`}>
+                  {cacheStatusLabel(cacheInfo.status)}
+                </span>
                 {isLoading ? (
                   <span className="rounded-full border border-white/70 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-950/65">
                     Refreshing...
@@ -317,8 +433,12 @@ function App() {
                   Plan around haze, sudden rain, and the trips people actually take.
                 </h1>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-emerald-950/75 sm:text-lg">
-                  The layout now reads from `/api/dashboard`, so the frontend is already aligned
-                  with the shared backend contract we will reuse for live API aggregation next.
+                  The layout now reads from `/api/dashboard`, and the route can now blend live
+                  provider data into the shared dashboard contract whenever upstream requests
+                  succeed.
+                </p>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-950/60">
+                  {cacheSummary(cacheInfo)}
                 </p>
               </div>
 
@@ -415,8 +535,8 @@ function App() {
                 </h2>
               </div>
               <p className="max-w-sm text-sm leading-6 text-emerald-950/65">
-                The endpoint is still mock-backed, but the frontend now behaves like a real API
-                consumer.
+                The route prefers live aggregation now, while still falling back safely when an
+                upstream provider is missing or unavailable.
               </p>
             </div>
 
@@ -541,23 +661,32 @@ function App() {
               </div>
 
               <div className="mt-6 space-y-3">
-                {snapshot.warnings.map((warning) => (
-                  <article
-                    key={`${warning.title}-${warning.window}`}
-                    className={`rounded-[24px] border p-4 ${severityClasses[warning.severity]}`}
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <p className="text-base font-extrabold">{warning.title}</p>
-                      <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em]">
-                        {warning.severity}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-current/60">
-                      {warning.window}
+                {snapshot.warnings.length === 0 ? (
+                  <div className="rounded-[24px] border border-dashed border-emerald-900/15 bg-[#f8f5eb]/85 p-6 text-center">
+                    <p className="subtle-label">No Active Warning</p>
+                    <p className="mt-3 text-sm font-semibold text-[#102820]">
+                      No location-specific warning is active for this lens right now.
                     </p>
-                    <p className="mt-3 text-sm leading-7 text-current/80">{warning.message}</p>
-                  </article>
-                ))}
+                  </div>
+                ) : (
+                  snapshot.warnings.map((warning) => (
+                    <article
+                      key={`${warning.title}-${warning.window}`}
+                      className={`rounded-[24px] border p-4 ${severityClasses[warning.severity]}`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-base font-extrabold">{warning.title}</p>
+                        <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em]">
+                          {warning.severity}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-current/60">
+                        {warning.window}
+                      </p>
+                      <p className="mt-3 text-sm leading-7 text-current/80">{warning.message}</p>
+                    </article>
+                  ))
+                )}
               </div>
             </section>
           </div>
@@ -641,7 +770,8 @@ function App() {
 
         <footer className="pb-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-emerald-950/45">
           Served at {dayjs(meta.servedAt).format('h:mm:ss A')} with a {meta.cacheTtlMinutes}
-          -minute cache target.
+          -minute server cache target. Frontend local cache TTL: {DASHBOARD_CACHE_TTL_MINUTES}{' '}
+          minutes.
         </footer>
       </div>
     </div>

@@ -335,7 +335,7 @@ function App() {
             <button
               type="button"
               onClick={retryFetch}
-              className="mt-8 rounded-full bg-[#16392f] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_-18px_rgba(11,37,30,0.9)]"
+              className="action-button mt-8"
             >
               Try again
             </button>
@@ -386,6 +386,10 @@ function App() {
 
   return (
     <div className="relative min-h-screen overflow-hidden text-[#17352d]">
+      <div className="aero-orb aero-orb-drift-slow aero-orb-sky pointer-events-none left-[-2.5rem] top-24 hidden h-32 w-32 lg:block" />
+      <div className="aero-orb aero-orb-drift-medium aero-orb-lime pointer-events-none right-[8%] top-[7.5rem] hidden h-24 w-24 xl:block" />
+      <div className="aero-orb aero-orb-drift-fast pointer-events-none bottom-24 left-[10%] hidden h-20 w-20 xl:block" />
+
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
         {error ? (
           <div className="panel flex flex-col gap-4 border-amber-900/10 bg-amber-50/85 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -399,7 +403,7 @@ function App() {
             <button
               type="button"
               onClick={retryFetch}
-              className="rounded-full bg-[#16392f] px-4 py-2 text-sm font-semibold text-white"
+              className="action-button"
             >
               Retry fetch
             </button>
@@ -407,22 +411,22 @@ function App() {
         ) : null}
 
         <header className="panel relative overflow-hidden p-6 sm:p-7 lg:p-9">
-          <div className="absolute inset-y-0 right-0 hidden w-2/5 rounded-l-[48px] ambient-cut lg:block" />
+          <div className="sharp-accent-panel ambient-cut absolute inset-y-0 right-0 hidden w-2/5 lg:block" />
 
           <div className="relative grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:gap-10">
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="subtle-label rounded-full border border-white/70 bg-white/65 px-3 py-1">
+                <span className="aero-chip chip subtle-label border border-white/70 bg-white/65 px-3 py-1">
                   Perak Weather + API Dashboard
                 </span>
-                <span className="rounded-full border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-900/75">
+                <span className="aero-chip chip border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-900/75">
                   {sourceLabel(meta.source)}
                 </span>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${cacheStatusClasses(cacheInfo.status)}`}>
+                <span className={`aero-chip chip px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${cacheStatusClasses(cacheInfo.status)}`}>
                   {cacheStatusLabel(cacheInfo.status)}
                 </span>
                 {isLoading ? (
-                  <span className="rounded-full border border-white/70 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-950/65">
+                  <span className="aero-chip chip border border-white/70 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-950/65">
                     Refreshing...
                   </span>
                 ) : null}
@@ -452,10 +456,8 @@ function App() {
                       type="button"
                       aria-pressed={isActive}
                       onClick={() => setSelectedLocation(location.key)}
-                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                        isActive
-                          ? 'bg-[#16392f] text-white shadow-[0_14px_28px_-18px_rgba(11,37,30,0.9)]'
-                          : 'border border-white/80 bg-white/60 text-emerald-950/75 hover:bg-white'
+                      className={`filter-button ${
+                        isActive ? 'filter-button-active' : 'filter-button-idle'
                       }`}
                     >
                       {location.label}
@@ -473,7 +475,7 @@ function App() {
                 <div className="value-card">
                   <p className="subtle-label">Air Quality</p>
                   <div className="mt-3 flex items-center gap-3">
-                    <span className={`rounded-full px-3 py-1 text-sm font-bold ${airBandClasses[snapshot.airBand]}`}>
+                    <span className={`aero-chip chip px-3 py-1 text-sm font-bold ${airBandClasses[snapshot.airBand]}`}>
                       AQI {snapshot.aqi}
                     </span>
                     <span className="text-sm font-semibold text-emerald-950/70">{snapshot.airBand}</span>
@@ -497,7 +499,7 @@ function App() {
               </div>
             </div>
 
-            <aside className="relative rounded-[30px] p-6 text-white shadow-[0_26px_80px_-34px_rgba(9,27,22,0.9)] ambient-cut sm:p-7">
+            <aside className="feature-panel ambient-cut relative p-6 text-white sm:p-7">
               <p className="text-xs font-semibold uppercase tracking-[0.26em] text-white/65">
                 Trip Lens
               </p>
@@ -505,7 +507,7 @@ function App() {
                 Can I hike {snapshot.hikeTip.target} today?
               </h2>
               <div className="mt-5 flex flex-wrap items-center gap-3">
-                <span className={`rounded-full px-4 py-2 text-sm font-bold ${hikeClasses[snapshot.hikeTip.verdict]}`}>
+                <span className={`aero-chip chip px-4 py-2 text-sm font-bold ${hikeClasses[snapshot.hikeTip.verdict]}`}>
                   {snapshot.hikeTip.verdict}
                 </span>
                 <span className="text-sm font-semibold text-white/72">
@@ -515,7 +517,7 @@ function App() {
               <p className="mt-5 text-lg font-semibold text-white/94">{snapshot.hikeTip.title}</p>
               <p className="mt-3 max-w-sm text-sm leading-7 text-white/78">{snapshot.hikeTip.reason}</p>
 
-              <div className="mt-8 rounded-[24px] border border-white/10 bg-black/15 p-4 backdrop-blur-md">
+              <div className="inset-panel mt-8 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/58">
                   Field Note
                 </p>
@@ -541,7 +543,7 @@ function App() {
             </div>
 
             {isEmptyState ? (
-              <div className="mt-6 rounded-[26px] border border-dashed border-emerald-900/15 bg-[#f8f5eb]/85 p-8 text-center">
+              <div className="empty-panel mt-6 p-8 text-center">
                 <p className="subtle-label">Forecast Empty</p>
                 <p className="mt-3 text-lg font-semibold text-[#102820]">
                   No forecast rows were returned for this location.
@@ -549,7 +551,7 @@ function App() {
               </div>
             ) : (
               <>
-                <div className="mt-6 h-[300px] rounded-[26px] border border-white/70 bg-[#f8f5eb]/85 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] sm:p-5">
+                <div className="chart-shell mt-6 h-[300px] p-4 sm:p-5">
                   <Line data={tempChartData} options={chartOptions} />
                 </div>
 
@@ -565,7 +567,7 @@ function App() {
                             {formatForecastDate(day.date)}
                           </p>
                         </div>
-                        <p className="rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-emerald-950/65">
+                        <p className="aero-chip chip bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-emerald-950/65">
                           {day.rainChance}% rain
                         </p>
                       </div>
@@ -599,12 +601,12 @@ function App() {
                   <p className="subtle-label">Air Quality</p>
                   <h2 className="display-face mt-2 text-3xl text-[#102820]">AQI snapshot</h2>
                 </div>
-                <span className={`rounded-full px-3 py-2 text-sm font-bold ${airBandClasses[snapshot.airBand]}`}>
+                <span className={`aero-chip chip px-3 py-2 text-sm font-bold ${airBandClasses[snapshot.airBand]}`}>
                   {snapshot.airBand}
                 </span>
               </div>
 
-              <div className="mt-6 rounded-[26px] bg-[#f7f4eb] p-5">
+              <div className="metric-shell mt-6 p-5">
                 <div className="flex items-end gap-3">
                   <p className="text-5xl font-black tracking-tight text-[#102820]">{snapshot.aqi}</p>
                   <p className="pb-2 text-sm font-semibold uppercase tracking-[0.18em] text-emerald-950/55">
@@ -655,14 +657,14 @@ function App() {
                     What needs attention today
                   </h2>
                 </div>
-                <span className="rounded-full border border-white/70 bg-white/70 px-3 py-2 text-sm font-semibold text-emerald-950/72">
+                <span className="aero-chip chip border border-white/70 bg-white/70 px-3 py-2 text-sm font-semibold text-emerald-950/72">
                   {warningCountLabel}
                 </span>
               </div>
 
               <div className="mt-6 space-y-3">
                 {snapshot.warnings.length === 0 ? (
-                  <div className="rounded-[24px] border border-dashed border-emerald-900/15 bg-[#f8f5eb]/85 p-6 text-center">
+                  <div className="empty-panel p-6 text-center">
                     <p className="subtle-label">No Active Warning</p>
                     <p className="mt-3 text-sm font-semibold text-[#102820]">
                       No location-specific warning is active for this lens right now.
@@ -672,11 +674,11 @@ function App() {
                   snapshot.warnings.map((warning) => (
                     <article
                       key={`${warning.title}-${warning.window}`}
-                      className={`rounded-[24px] border p-4 ${severityClasses[warning.severity]}`}
+                      className={`warning-card border p-4 ${severityClasses[warning.severity]}`}
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="text-base font-extrabold">{warning.title}</p>
-                        <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em]">
+                        <span className="aero-chip chip bg-white/70 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em]">
                           {warning.severity}
                         </span>
                       </div>
@@ -706,14 +708,14 @@ function App() {
               ].map(([title, detail, status]) => (
                 <div
                   key={title}
-                  className="flex items-start justify-between gap-4 rounded-[22px] bg-[#f8f5eb]/90 px-4 py-4"
+                  className="strip-card flex items-start justify-between gap-4 bg-[#f8f5eb]/90 px-4 py-4"
                 >
                   <div>
                     <p className="font-bold text-[#102820]">{title}</p>
                     <p className="mt-1 text-sm text-emerald-950/65">{detail}</p>
                   </div>
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] ${
+                    className={`aero-chip chip px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] ${
                       status === 'must-have'
                         ? 'bg-[#18392f] text-emerald-50'
                         : 'bg-emerald-950 text-emerald-50'

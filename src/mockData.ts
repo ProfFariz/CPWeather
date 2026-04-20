@@ -19,6 +19,7 @@ export const dashboardMocks = {
       'Cooler morning air gives way to brighter skies before convective rain starts building toward the late afternoon.',
     nextRainWindow: 'Best dry window: 8 AM to 2 PM',
     currentTemp: 28,
+    currentSummary: 'Bright morning with gentle cloud cover',
     aqi: 46,
     airBand: 'Good',
     pollutants: { pm25: 12, pm10: 21, o3: 14, no2: 6 },
@@ -95,6 +96,7 @@ export const dashboardMocks = {
     overview: 'Warm morning, sticky haze, and thunderstorms pushing in after 3 PM.',
     nextRainWindow: 'Best dry window: 9 AM to 1 PM',
     currentTemp: 29,
+    currentSummary: 'Humid with brighter breaks',
     aqi: 68,
     airBand: 'Moderate',
     pollutants: { pm25: 19, pm10: 33, o3: 17, no2: 9 },
@@ -144,6 +146,7 @@ export const dashboardMocks = {
       'Classic Taiping pattern: cooler start, quick cloud growth, and rain odds rising fast by noon.',
     nextRainWindow: 'Best dry window: 8 AM to 11 AM',
     currentTemp: 27,
+    currentSummary: 'Clouds building over the hills',
     aqi: 54,
     airBand: 'Moderate',
     pollutants: { pm25: 14, pm10: 27, o3: 13, no2: 7 },
@@ -186,6 +189,7 @@ export const dashboardMocks = {
       'Sea breeze is keeping temperatures manageable, but coastal storms can still pop up after sunset.',
     nextRainWindow: 'Best dry window: 10 AM to 4 PM',
     currentTemp: 30,
+    currentSummary: 'Mostly bright with a sea breeze',
     aqi: 42,
     airBand: 'Good',
     pollutants: { pm25: 11, pm10: 19, o3: 10, no2: 5 },
@@ -242,7 +246,18 @@ export const hikeClasses: Record<HikeVerdict, string> = {
 export function getDashboardSnapshot(
   locationKey: LocationKey = defaultLocationKey,
 ): LocationSnapshot {
-  return dashboardMocks[locationKey]
+  const snapshot = dashboardMocks[locationKey]
+
+  return {
+    ...snapshot,
+    pollutants: { ...snapshot.pollutants },
+    hikeTip: {
+      ...snapshot.hikeTip,
+      cues: snapshot.hikeTip.cues.map((cue) => ({ ...cue })),
+    },
+    warnings: snapshot.warnings.map((warning) => ({ ...warning })),
+    forecast: snapshot.forecast.map((day) => ({ ...day })),
+  }
 }
 
 export function buildMockDashboardPayload(
@@ -257,6 +272,7 @@ export function buildMockDashboardPayload(
       servedAt: new Date().toISOString(),
       cacheTtlMinutes: 15,
       providers: {
+        openWeatherCurrent: 'mock',
         openWeatherForecast: 'mock',
         openWeatherAir: 'mock',
         malaysiaForecast: 'mock',

@@ -3,9 +3,11 @@ import { buildDashboardPayload } from './dashboardService.ts'
 import {
   defaultLocationKey,
   isLocationKey,
+  locations,
   type DashboardErrorPayload,
   type DashboardPayload,
 } from '../src/shared/dashboard.ts'
+import { isDashboardPayload } from '../src/shared/dashboardValidation.ts'
 
 type ApiRequest = {
   method?: string
@@ -48,6 +50,10 @@ function sendJson(
   res.status(statusCode).json(body)
 }
 
+function getSupportedLocationList() {
+  return locations.map((location) => location.key).join('|')
+}
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900')
 
@@ -55,7 +61,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     sendJson(res, 405, {
       error: {
         code: 'METHOD_NOT_ALLOWED',
-        message: 'Use GET /api/dashboard?location=ipoh|taiping|lumut.',
+        message: `Use GET /api/dashboard?location=${getSupportedLocationList()}.`,
       },
       meta: {
         servedAt: new Date().toISOString(),
@@ -71,7 +77,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     sendJson(res, 400, {
       error: {
         code: 'INVALID_LOCATION',
-        message: `Unknown location "${locationKey}". Use ipoh, taiping, or lumut.`,
+        message: `Unknown location "${locationKey}". Use ${getSupportedLocationList()}.`,
       },
       meta: {
         servedAt: new Date().toISOString(),
@@ -82,6 +88,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   try {
     const payload = await buildDashboardPayload(locationKey)
+
+    if (!isDashboardPayload(payload)) {
+      throw new Error('Dashboard payload validation failed.')
+    }
+
     sendJson(res, 200, payload)
     return
   } catch {

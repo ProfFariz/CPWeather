@@ -84,14 +84,19 @@ flowchart LR
 - Forecast chart using Chart.js.
 - Live warning feed panel.
 - Air-quality widget and rain window widget.
+- True current-weather temperature and summary from OpenWeather.
 - Shared typed dashboard contract used by frontend and backend.
 - `/api/dashboard` route for unified data access.
 - Malaysia forecast and warning integration.
 - OpenWeather forecast and air-pollution integration.
 - Explainable hiking verdict logic based on warnings, AQI, and rain timing.
 - `localStorage` caching with a 15-minute TTL and stale fallback behavior.
+- Dashboard fetch/cache logic extracted into a dedicated React hook.
+- Main dashboard UI split into focused components instead of one large page file.
 - Loading, error, retry, and empty-state handling.
+- Vitest coverage for payload validation, normalization outcomes, and hiking decisions.
 - `pnpm lint` passing.
+- `pnpm test` passing.
 - `pnpm build` passing.
 
 ## Current Locations
@@ -178,16 +183,23 @@ CPWeather/
 |-- api/
 |   |-- dashboard.ts
 |   |-- dashboardService.ts
+|   |-- dashboardService.test.ts
 |   `-- locationConfig.ts
 |-- src/
+|   |-- components/
+|   |   `-- dashboard/
+|   |-- hooks/
+|   |   `-- useDashboard.ts
 |   |-- lib/
 |   |   `-- dashboardCache.ts
 |   |-- shared/
 |   |   `-- dashboard.ts
+|   |   `-- dashboardValidation.ts
 |   |-- App.tsx
 |   |-- index.css
 |   `-- mockData.ts
 |-- vite.config.ts
+|-- vitest.config.ts
 |-- .env.example
 `-- readme.md
 ```
@@ -195,6 +207,7 @@ CPWeather/
 ## Data Sources
 
 - OpenWeather 5-day forecast
+- OpenWeather current weather
 - OpenWeather air pollution
 - Malaysia forecast data
 - Malaysia warning data
@@ -223,6 +236,12 @@ pnpm dev
 
 ```powershell
 pnpm lint
+```
+
+### Test
+
+```powershell
+pnpm test
 ```
 
 ### Build
@@ -255,8 +274,9 @@ Important:
 
 - cache lives in `localStorage`
 - TTL is 15 minutes
-- cache key version is currently `v3`
+- cache key version is currently `v4`
 - fresh cache renders immediately
+- fresh and stale cache both revalidate in the background
 - stale cache can still be shown if a live fetch fails
 
 ## Hiking Decision Logic
@@ -279,7 +299,6 @@ The UI also shows cue chips so the user can understand why that verdict was chos
 
 ## What Is Still Missing
 
-- React error boundary for a safer full-app failure path
 - final Vercel deployment setup
 - mobile QA and cross-browser QA
 - README screenshots and provider attribution polish
@@ -290,10 +309,10 @@ The UI also shows cue chips so the user can understand why that verdict was chos
 
 ## Recommended Next Order
 
-1. Add a React error boundary.
-2. Test the full dashboard carefully on phone and desktop.
-3. Deploy to Vercel and set production env vars.
-4. Add screenshots and attribution.
+1. Test the full dashboard carefully on phone and desktop.
+2. Deploy to Vercel and set production env vars.
+3. Add screenshots and attribution.
+4. Deploy to Vercel and verify production env vars plus live API behavior.
 5. Only after the MVP is stable, decide on Supabase, i18n, and PWA.
 
 ## Things Not To Forget

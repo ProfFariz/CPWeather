@@ -1,9 +1,10 @@
 import { type DashboardPayload, type LocationKey } from '../shared/dashboard.ts'
+import { isDashboardPayload } from '../shared/dashboardValidation.ts'
 
 export const DASHBOARD_CACHE_TTL_MINUTES = 15
 
 const DASHBOARD_CACHE_TTL_MS = DASHBOARD_CACHE_TTL_MINUTES * 60 * 1000
-const DASHBOARD_CACHE_PREFIX = 'cpweather.dashboard.v3'
+const DASHBOARD_CACHE_PREFIX = 'cpweather.dashboard.v4'
 
 type DashboardCacheRecord = {
   savedAt: string
@@ -51,8 +52,7 @@ export function readDashboardCache(
 
     if (
       typeof parsed?.savedAt !== 'string' ||
-      typeof parsed.payload !== 'object' ||
-      parsed.payload === null
+      !isDashboardPayload(parsed.payload)
     ) {
       storage.removeItem(getDashboardCacheKey(locationKey))
       return null
@@ -69,7 +69,7 @@ export function readDashboardCache(
 
     return {
       savedAt: parsed.savedAt,
-      payload: parsed.payload as DashboardPayload,
+      payload: parsed.payload,
       ageMs,
       isFresh: ageMs <= DASHBOARD_CACHE_TTL_MS,
     }
@@ -85,7 +85,7 @@ export function writeDashboardCache(
 ): DashboardCacheRecord | null {
   const storage = getStorage()
 
-  if (!storage) {
+  if (!storage || !isDashboardPayload(payload)) {
     return null
   }
 

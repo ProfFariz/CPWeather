@@ -58,6 +58,19 @@ type OpenWeatherForecastResponse = {
   }>
 }
 
+type OpenWeatherCurrentResponse = {
+  dt: number
+  main: {
+    temp: number
+    feels_like: number
+    humidity: number
+  }
+  weather: Array<{
+    main: string
+    description: string
+  }>
+}
+
 type OpenWeatherAirResponse = {
   list: Array<{
     dt: number
@@ -174,7 +187,10 @@ function cloneSnapshot(snapshot: LocationSnapshot): LocationSnapshot {
   return {
     ...snapshot,
     pollutants: { ...snapshot.pollutants },
-    hikeTip: { ...snapshot.hikeTip },
+    hikeTip: {
+      ...snapshot.hikeTip,
+      cues: snapshot.hikeTip.cues.map((cue) => ({ ...cue })),
+    },
     warnings: snapshot.warnings.map((warning) => ({ ...warning })),
     forecast: snapshot.forecast.map((day) => ({ ...day })),
   }
@@ -346,7 +362,7 @@ function estimateCurrentTempFromForecastDay(day: ForecastDay | undefined) {
   return Math.round((day.high + day.low) / 2)
 }
 
-function getCurrentTempFromOpenWeather(
+function getCurrentTempFromOpenWeatherForecast(
   data: OpenWeatherForecastResponse,
   now: Date,
 ) {
@@ -364,6 +380,12 @@ function getCurrentTempFromOpenWeather(
   }, null)
 
   return nearestEntry ? Math.round(nearestEntry.main.temp) : null
+}
+
+function getCurrentSummaryFromOpenWeatherCurrent(
+  data: OpenWeatherCurrentResponse,
+) {
+  return toTitleCase(data.weather[0]?.description ?? 'Current conditions steady')
 }
 
 function mapOpenWeatherAqiToBand(aqiIndex: number): AirBand {
@@ -782,9 +804,10 @@ function buildAirCueLabel(snapshot: LocationSnapshot) {
 function buildOverview(snapshot: LocationSnapshot) {
   const firstForecast = snapshot.forecast[0]
   const warningLead = snapshot.warnings[0]
+  const currentText = `Current conditions look ${snapshot.currentSummary.toLowerCase()}.`
 
   const forecastText = firstForecast
-    ? `The main weather signal today is ${firstForecast.summary.toLowerCase()}.`
+    ? `The broader trend today is ${firstForecast.summary.toLowerCase()}.`
     : 'Weather conditions are steady for now.'
 
   const airText =
@@ -798,7 +821,7 @@ function buildOverview(snapshot: LocationSnapshot) {
     ? `Keep an eye on ${warningLead.title.toLowerCase()}.`
     : 'No location-specific warnings are active at the moment.'
 
-  return `${forecastText} ${airText} ${warningText}`
+  return `${currentText} ${forecastText} ${airText} ${warningText}`
 }
 
 function buildHikeTip(
@@ -973,6 +996,22 @@ async function fetchOpenWeatherForecast(
   )
 }
 
+async function fetchOpenWeatherCurrent(
+  location: LiveLocationConfig,
+  apiKey: string,
+) {
+  const query = new URLSearchParams({
+    lat: String(location.lat),
+    lon: String(location.lon),
+    appid: apiKey,
+    units: 'metric',
+  })
+
+  return fetchJson<OpenWeatherCurrentResponse>(
+    `${OPENWEATHER_BASE_URL}/weather?${query.toString()}`,
+  )
+}
+
 async function fetchOpenWeatherAir(
   location: LiveLocationConfig,
   apiKey: string,
@@ -1029,10 +1068,19 @@ export async function buildDashboardPayload(
     wetSlotCount: 0,
   }
 
-  const [malaysiaForecastResult, malaysiaWarningsResult, openWeatherForecastResult, openWeatherAirResult] =
+  const [
+    malaysiaForecastResult,
+    malaysiaWarningsResult,
+    openWeatherCurrentResult,
+    openWeatherForecastResult,
+    openWeatherAirResult,
+  ] =
     await Promise.allSettled([
       fetchMalaysiaForecast(location),
       fetchMalaysiaWarnings(),
+      openWeatherApiKey
+        ? fetchOpenWeatherCurrent(location, openWeatherApiKey)
+        : Promise.resolve(null),
       openWeatherApiKey
         ? fetchOpenWeatherForecast(location, openWeatherApiKey)
         : Promise.resolve(null),
@@ -1048,6 +1096,7 @@ export async function buildDashboardPayload(
     const malaysiaForecast = malaysiaForecastResult.value
     snapshot.forecast = normalizeMalaysiaForecast(malaysiaForecast, snapshot.forecast)
     snapshot.currentTemp = estimateCurrentTempFromForecastDay(snapshot.forecast[0])
+    snapshot.currentSummary = snapshot.forecast[0]?.summary ?? snapshot.currentSummary
     providers.malaysiaForecast = 'live'
 
     if (malaysiaForecast[0]) {
@@ -1069,13 +1118,27 @@ export async function buildDashboardPayload(
   }
 
   if (
+    openWeatherCurrentResult.status === 'fulfilled' &&
+    openWeatherCurrentResult.value
+  ) {
+    snapshot.currentTemp = Math.round(openWeatherCurrentResult.value.main.temp)
+    snapshot.currentSummary = getCurrentSummaryFromOpenWeatherCurrent(
+      openWeatherCurrentResult.value,
+    )
+    providers.openWeatherCurrent = 'live'
+  }
+
+  if (
     openWeatherForecastResult.status === 'fulfilled' &&
     openWeatherForecastResult.value
   ) {
     snapshot.forecast = normalizeOpenWeatherForecast(openWeatherForecastResult.value)
-    snapshot.currentTemp =
-      getCurrentTempFromOpenWeather(openWeatherForecastResult.value, now) ??
-      estimateCurrentTempFromForecastDay(snapshot.forecast[0])
+    if (providers.openWeatherCurrent !== 'live') {
+      snapshot.currentTemp =
+        getCurrentTempFromOpenWeatherForecast(openWeatherForecastResult.value, now) ??
+        estimateCurrentTempFromForecastDay(snapshot.forecast[0])
+      snapshot.currentSummary = snapshot.forecast[0]?.summary ?? snapshot.currentSummary
+    }
     snapshot.nextRainWindow = buildNextRainWindowFromOpenWeather(
       openWeatherForecastResult.value,
     )

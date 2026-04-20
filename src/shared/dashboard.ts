@@ -54,6 +54,7 @@ export type LocationSnapshot = {
   overview: string
   nextRainWindow: string
   currentTemp: number
+  currentSummary: string
   aqi: number
   airBand: AirBand
   pollutants: PollutantBreakdown
@@ -67,6 +68,7 @@ export type DashboardMeta = {
   servedAt: string
   cacheTtlMinutes: number
   providers: {
+    openWeatherCurrent: DashboardProviderSource
     openWeatherForecast: DashboardProviderSource
     openWeatherAir: DashboardProviderSource
     malaysiaForecast: DashboardProviderSource

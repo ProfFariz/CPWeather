@@ -104,6 +104,39 @@ type MalaysiaWarningItem = {
   instruction_bm: string | null
 }
 
+type WetSlotSignal = {
+  startsAt: Date
+  startsLabel: string
+  hoursAway: number
+  rainChance: number
+  rainVolumeMm: number
+  summary: string
+  hasThunder: boolean
+}
+
+type WarningSignal = {
+  title: string
+  severity: Severity
+  startsAt: Date
+  endsAt: Date
+  startsInHours: number
+  endsInHours: number
+  isActive: boolean
+  mentionsThunder: boolean
+  mentionsHeavyRain: boolean
+  mentionsStrongWind: boolean
+}
+
+type HikeDecisionSignals = {
+  now: Date
+  nextWetSlot: WetSlotSignal | null
+  heaviestWetSlot: WetSlotSignal | null
+  wetSlotCount: number
+  activeWarning: WarningSignal | null
+  nextWarning: WarningSignal | null
+  highestWarningSeverity: Severity | null
+}
+
 const malaysiaForecastTranslations: Record<string, string> = {
   Berjerebu: 'Hazy',
   'Tiada hujan': 'No rain',
@@ -123,8 +156,18 @@ const malaysiaForecastTranslations: Record<string, string> = {
     'Isolated thunderstorms over inland areas',
 }
 
+const severityWeight: Record<Severity, number> = {
+  Monitor: 1,
+  Watch: 2,
+  Alert: 3,
+}
+
 function toTitleCase(value: string) {
   return value.replace(/\b\w/g, (character) => character.toUpperCase())
+}
+
+function getHoursUntil(target: Date, now: Date) {
+  return (target.getTime() - now.getTime()) / (1000 * 60 * 60)
 }
 
 function cloneSnapshot(snapshot: LocationSnapshot): LocationSnapshot {
@@ -295,6 +338,34 @@ function buildNextRainWindowFromOpenWeather(data: OpenWeatherForecastResponse) {
   return `Best dry window: Until ${formatMalaysiaTime(nextWetSlot.dt * 1000)}`
 }
 
+function estimateCurrentTempFromForecastDay(day: ForecastDay | undefined) {
+  if (!day) {
+    return 28
+  }
+
+  return Math.round((day.high + day.low) / 2)
+}
+
+function getCurrentTempFromOpenWeather(
+  data: OpenWeatherForecastResponse,
+  now: Date,
+) {
+  const nearestEntry = data.list.reduce<
+    OpenWeatherForecastResponse['list'][number] | null
+  >((current, entry) => {
+    if (!current) {
+      return entry
+    }
+
+    const currentDistance = Math.abs(now.getTime() - current.dt * 1000)
+    const nextDistance = Math.abs(now.getTime() - entry.dt * 1000)
+
+    return nextDistance < currentDistance ? entry : current
+  }, null)
+
+  return nearestEntry ? Math.round(nearestEntry.main.temp) : null
+}
+
 function mapOpenWeatherAqiToBand(aqiIndex: number): AirBand {
   if (aqiIndex <= 2) {
     return 'Good'
@@ -391,6 +462,15 @@ function normalizeMalaysiaForecast(
     })
 }
 
+function getRelevantMalaysiaWarnings(
+  warnings: MalaysiaWarningItem[],
+  location: LiveLocationConfig,
+) {
+  return warnings
+    .filter((warning) => isWarningRelevant(warning, location))
+    .sort((left, right) => left.valid_from.localeCompare(right.valid_from))
+}
+
 function isWarningRelevant(
   warning: MalaysiaWarningItem,
   location: LiveLocationConfig,
@@ -416,21 +496,106 @@ function formatWarningWindow(validFrom: string, validTo: string) {
   return `${formatMalaysiaDateTime(validFrom)} - ${formatMalaysiaDateTime(validTo)}`
 }
 
+function getWarningTitle(warning: MalaysiaWarningItem) {
+  return (
+    warning.heading_en ??
+    warning.warning_issue.title_en ??
+    warning.heading_bm ??
+    warning.warning_issue.title_bm ??
+    'Weather warning'
+  )
+}
+
+function buildWarningSignal(
+  warning: MalaysiaWarningItem,
+  now: Date,
+): WarningSignal {
+  const title = getWarningTitle(warning)
+  const startsAt = new Date(warning.valid_from)
+  const endsAt = new Date(warning.valid_to)
+  const searchable = [
+    title,
+    warning.text_en,
+    warning.text_bm,
+    warning.instruction_en,
+    warning.instruction_bm,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+
+  const startsInHours = getHoursUntil(startsAt, now)
+  const endsInHours = getHoursUntil(endsAt, now)
+
+  return {
+    title,
+    severity: getSeverityFromWarning(warning),
+    startsAt,
+    endsAt,
+    startsInHours,
+    endsInHours,
+    isActive: startsInHours <= 0 && endsInHours > 0,
+    mentionsThunder:
+      searchable.includes('thunder') ||
+      searchable.includes('ribut') ||
+      searchable.includes('lightning'),
+    mentionsHeavyRain:
+      searchable.includes('heavy rain') ||
+      searchable.includes('hujan lebat') ||
+      searchable.includes('continuous rain'),
+    mentionsStrongWind:
+      searchable.includes('strong wind') ||
+      searchable.includes('angin kencang') ||
+      searchable.includes('winds'),
+  }
+}
+
+function buildWarningDecisionSignals(
+  warnings: MalaysiaWarningItem[],
+  now: Date,
+) {
+  const warningSignals = warnings.map((warning) => buildWarningSignal(warning, now))
+  const activeWarning =
+    warningSignals
+      .filter((warning) => warning.isActive)
+      .sort(
+        (left, right) =>
+          severityWeight[right.severity] - severityWeight[left.severity],
+      )[0] ?? null
+
+  const nextWarning =
+    warningSignals
+      .filter((warning) => warning.startsInHours > 0)
+      .sort((left, right) => left.startsInHours - right.startsInHours)[0] ?? null
+
+  const highestWarningSeverity = warningSignals.reduce<Severity | null>(
+    (current, warning) => {
+      if (!current) {
+        return warning.severity
+      }
+
+      return severityWeight[warning.severity] > severityWeight[current]
+        ? warning.severity
+        : current
+    },
+    null,
+  )
+
+  return {
+    activeWarning,
+    nextWarning,
+    highestWarningSeverity,
+  }
+}
+
 function normalizeMalaysiaWarnings(
   warnings: MalaysiaWarningItem[],
   location: LiveLocationConfig,
 ): WarningItem[] {
-  return warnings
-    .filter((warning) => isWarningRelevant(warning, location))
-    .sort((left, right) => left.valid_from.localeCompare(right.valid_from))
+  return getRelevantMalaysiaWarnings(warnings, location)
     .slice(0, 3)
     .map((warning) => ({
-      title:
-        warning.heading_en ??
-        warning.warning_issue.title_en ??
-        warning.heading_bm ??
-        warning.warning_issue.title_bm ??
-        'Weather warning',
+      title: getWarningTitle(warning),
       severity: getSeverityFromWarning(warning),
       window: formatWarningWindow(warning.valid_from, warning.valid_to),
       message:
@@ -440,6 +605,178 @@ function normalizeMalaysiaWarnings(
         warning.instruction_bm ??
         'Follow the latest advisory from MET Malaysia.',
     }))
+}
+
+function hasWetWeatherSignal(entry: OpenWeatherForecastResponse['list'][number]) {
+  const rainChance = Math.round((entry.pop ?? 0) * 100)
+  const rainVolumeMm = entry.rain?.['3h'] ?? 0
+  const description = entry.weather[0]?.description.toLowerCase() ?? ''
+  const main = entry.weather[0]?.main.toLowerCase() ?? ''
+
+  return (
+    rainChance >= 45 ||
+    rainVolumeMm >= 0.2 ||
+    description.includes('rain') ||
+    description.includes('drizzle') ||
+    description.includes('thunder') ||
+    main.includes('rain') ||
+    main.includes('thunder')
+  )
+}
+
+function buildWetSlotSignal(
+  entry: OpenWeatherForecastResponse['list'][number],
+  now: Date,
+): WetSlotSignal {
+  const startsAt = new Date(entry.dt * 1000)
+  const summary = toTitleCase(entry.weather[0]?.description ?? 'Cloudy')
+  const hasThunder = summary.toLowerCase().includes('thunder')
+
+  return {
+    startsAt,
+    startsLabel: formatMalaysiaTime(startsAt),
+    hoursAway: getHoursUntil(startsAt, now),
+    rainChance: Math.round((entry.pop ?? 0) * 100),
+    rainVolumeMm: Number((entry.rain?.['3h'] ?? 0).toFixed(1)),
+    summary,
+    hasThunder,
+  }
+}
+
+function buildWetSlotDecisionSignals(
+  data: OpenWeatherForecastResponse,
+  now: Date,
+) {
+  const todayKey = formatMalaysiaDate(now)
+  const upcomingTodayEntries = data.list.filter((entry) => {
+    const entryDate = new Date(entry.dt * 1000)
+
+    return (
+      formatMalaysiaDate(entryDate) === todayKey &&
+      entryDate.getTime() >= now.getTime()
+    )
+  })
+
+  const wetSlots = upcomingTodayEntries
+    .filter((entry) => hasWetWeatherSignal(entry))
+    .map((entry) => buildWetSlotSignal(entry, now))
+
+  const heaviestWetSlot =
+    wetSlots.reduce<WetSlotSignal | null>((current, slot) => {
+      const currentScore =
+        (current?.rainChance ?? 0) +
+        (current?.rainVolumeMm ?? 0) * 10 +
+        ((current?.hasThunder ?? false) ? 30 : 0)
+      const nextScore =
+        slot.rainChance + slot.rainVolumeMm * 10 + (slot.hasThunder ? 30 : 0)
+
+      if (!current || nextScore > currentScore) {
+        return slot
+      }
+
+      return current
+    }, null) ?? null
+
+  return {
+    nextWetSlot: wetSlots[0] ?? null,
+    heaviestWetSlot,
+    wetSlotCount: wetSlots.length,
+  }
+}
+
+function formatWetSlotCue(slot: WetSlotSignal | null) {
+  if (!slot) {
+    return 'No meaningful rain band is showing for the rest of today.'
+  }
+
+  if (slot.hoursAway <= 1) {
+    return `Rain risk is arriving now and looks strongest around ${slot.startsLabel}.`
+  }
+
+  if (slot.hoursAway <= 3) {
+    return `The next rain band is due around ${slot.startsLabel}.`
+  }
+
+  return `The next meaningful rain risk is around ${slot.startsLabel}.`
+}
+
+function buildRainCueLabel(slot: WetSlotSignal | null) {
+  if (!slot) {
+    return {
+      label: 'No major rain band today',
+      tone: 'positive' as const,
+    }
+  }
+
+  if (slot.hoursAway <= 1) {
+    return {
+      label: `Rain arriving now`,
+      tone: 'danger' as const,
+    }
+  }
+
+  if (slot.hoursAway <= 3) {
+    return {
+      label: `Rain around ${slot.startsLabel}`,
+      tone: slot.hasThunder || slot.rainChance >= 80 ? ('danger' as const) : ('caution' as const),
+    }
+  }
+
+  return {
+    label: `Rain later ${slot.startsLabel}`,
+    tone: 'neutral' as const,
+  }
+}
+
+function buildWarningCueLabel(
+  activeWarning: WarningSignal | null,
+  nextWarning: WarningSignal | null,
+) {
+  if (activeWarning) {
+    return {
+      label: `${activeWarning.title} active now`,
+      tone:
+        severityWeight[activeWarning.severity] >= severityWeight.Watch ||
+        activeWarning.mentionsThunder ||
+        activeWarning.mentionsHeavyRain ||
+        activeWarning.mentionsStrongWind
+          ? ('danger' as const)
+          : ('caution' as const),
+    }
+  }
+
+  if (nextWarning && nextWarning.startsInHours <= 6) {
+    return {
+      label: `${nextWarning.title} at ${formatMalaysiaTime(nextWarning.startsAt)}`,
+      tone: 'caution' as const,
+    }
+  }
+
+  return {
+    label: 'No active warning',
+    tone: 'positive' as const,
+  }
+}
+
+function buildAirCueLabel(snapshot: LocationSnapshot) {
+  if (snapshot.airBand === 'Poor' || snapshot.aqi >= 120) {
+    return {
+      label: `AQI ${snapshot.aqi} poor`,
+      tone: 'danger' as const,
+    }
+  }
+
+  if (snapshot.airBand === 'Moderate' || snapshot.aqi >= 60) {
+    return {
+      label: `AQI ${snapshot.aqi} moderate`,
+      tone: 'caution' as const,
+    }
+  }
+
+  return {
+    label: `AQI ${snapshot.aqi} good`,
+    tone: 'positive' as const,
+  }
 }
 
 function buildOverview(snapshot: LocationSnapshot) {
@@ -464,16 +801,14 @@ function buildOverview(snapshot: LocationSnapshot) {
   return `${forecastText} ${airText} ${warningText}`
 }
 
-function buildHikeTip(snapshot: LocationSnapshot, target: string): HikeTip {
+function buildHikeTip(
+  snapshot: LocationSnapshot,
+  target: string,
+  signals?: HikeDecisionSignals,
+): HikeTip {
   const today = snapshot.forecast[0]
-  const highestWarningSeverity = snapshot.warnings.reduce<Severity | null>(
+  const fallbackHighestWarningSeverity = snapshot.warnings.reduce<Severity | null>(
     (current, warning) => {
-      const severityWeight = {
-        Monitor: 1,
-        Watch: 2,
-        Alert: 3,
-      }
-
       if (!current) {
         return warning.severity
       }
@@ -485,65 +820,117 @@ function buildHikeTip(snapshot: LocationSnapshot, target: string): HikeTip {
     null,
   )
 
-  let riskScore = 0
+  const highestWarningSeverity =
+    signals?.highestWarningSeverity ?? fallbackHighestWarningSeverity
+  const activeWarning = signals?.activeWarning ?? null
+  const nextWarning = signals?.nextWarning ?? null
+  const nextWetSlot = signals?.nextWetSlot ?? null
+  const heaviestWetSlot = signals?.heaviestWetSlot ?? null
+  const wetSlotCount = signals?.wetSlotCount ?? 0
 
-  if (highestWarningSeverity === 'Alert') {
-    riskScore += 3
-  } else if (highestWarningSeverity === 'Watch') {
-    riskScore += 2
-  } else if (highestWarningSeverity === 'Monitor') {
-    riskScore += 1
-  }
+  const poorAir = snapshot.airBand === 'Poor' || snapshot.aqi >= 120
+  const moderateAir =
+    snapshot.airBand === 'Moderate' || (snapshot.aqi >= 60 && snapshot.aqi < 120)
+  const thunderSummary = today
+    ? today.summary.toLowerCase().includes('thunder') ||
+      today.summary.toLowerCase().includes('storm')
+    : false
+  const nearTermHeavyRain =
+    nextWetSlot !== null &&
+    nextWetSlot.hoursAway <= 3 &&
+    (nextWetSlot.hasThunder ||
+      nextWetSlot.rainChance >= 80 ||
+      nextWetSlot.rainVolumeMm >= 3)
+  const shortOutdoorWindow =
+    nextWetSlot !== null &&
+    nextWetSlot.hoursAway <= 5 &&
+    (nextWetSlot.rainChance >= 55 || nextWetSlot.rainVolumeMm >= 1)
+  const warningStartsSoon =
+    nextWarning !== null &&
+    nextWarning.startsInHours <= 4
+  const activeStormWarning =
+    activeWarning !== null &&
+    (activeWarning.mentionsThunder ||
+      activeWarning.mentionsHeavyRain ||
+      activeWarning.mentionsStrongWind)
+  const laterTodayTurnsWet =
+    wetSlotCount >= 2 ||
+    (heaviestWetSlot !== null &&
+      heaviestWetSlot.hoursAway <= 8 &&
+      (heaviestWetSlot.rainChance >= 70 || heaviestWetSlot.rainVolumeMm >= 4))
+  const warningCueLabel = buildWarningCueLabel(activeWarning, nextWarning)
+  const rainCueLabel = buildRainCueLabel(nextWetSlot)
+  const airCueLabel = buildAirCueLabel(snapshot)
 
-  if (snapshot.airBand === 'Poor' || snapshot.aqi >= 120) {
-    riskScore += 2
-  } else if (snapshot.airBand === 'Moderate' || snapshot.aqi >= 60) {
-    riskScore += 1
-  }
-
-  if (today) {
-    const loweredSummary = today.summary.toLowerCase()
-
-    if (
-      today.rainChance >= 70 ||
-      loweredSummary.includes('thunder') ||
-      loweredSummary.includes('storm')
-    ) {
-      riskScore += 2
-    } else if (today.rainChance >= 45 || loweredSummary.includes('rain')) {
-      riskScore += 1
-    }
-  }
-
-  if (riskScore >= 4) {
+  if (poorAir) {
     return {
       target,
       verdict: 'Skip',
-      confidence: 84,
-      title: 'Conditions are stacked against a comfortable hike.',
-      reason:
-        'Warnings, air quality, or rain timing all point toward a poor outdoor window. It is better to postpone or switch to an indoor backup plan.',
+      confidence: 88,
+      title: 'Air quality is too rough for a proper hike.',
+      reason: `AQI is ${snapshot.aqi}, which is a poor reading for a strenuous climb or long exposed walk. Wait for cleaner air before treating this as a hiking day.`,
+      cues: [airCueLabel, warningCueLabel, rainCueLabel],
     }
   }
 
-  if (riskScore >= 2) {
+  if (
+    highestWarningSeverity === 'Alert' ||
+    (activeStormWarning && nearTermHeavyRain) ||
+    (activeWarning !== null &&
+      severityWeight[activeWarning.severity] >= severityWeight.Watch)
+  ) {
+    const warningName = activeWarning?.title ?? 'weather warning'
+    const rainCue = formatWetSlotCue(nextWetSlot)
+
+    return {
+      target,
+      verdict: 'Skip',
+      confidence: 90,
+      title: 'Active storm risk makes this a poor hiking window.',
+      reason: `${warningName} is already active for this area. ${rainCue} For an exposed route, that is too tight a margin to recommend a hike.`,
+      cues: [warningCueLabel, rainCueLabel, airCueLabel],
+    }
+  }
+
+  if (
+    activeWarning !== null ||
+    warningStartsSoon ||
+    nearTermHeavyRain ||
+    moderateAir ||
+    thunderSummary ||
+    shortOutdoorWindow ||
+    laterTodayTurnsWet
+  ) {
+    const warningCue =
+      activeWarning !== null
+        ? `${activeWarning.title} is active now`
+        : nextWarning !== null
+          ? `${nextWarning.title} starts around ${formatMalaysiaTime(nextWarning.startsAt)}`
+          : null
+
+    const rainCue = nextWetSlot
+      ? `The next rain band is due around ${nextWetSlot.startsLabel}`
+      : 'Rain risk still builds later in the day'
+
     return {
       target,
       verdict: 'Caution',
-      confidence: 74,
-      title: 'Possible, but only with tight timing and a backup plan.',
-      reason:
-        'You still have an outdoor window, but it gets weaker once rain risk or air quality starts slipping. Keep the outing early and flexible.',
+      confidence: activeWarning !== null || warningStartsSoon || nearTermHeavyRain ? 81 : 76,
+      title: 'There is a usable window, but it closes later today.',
+      reason: warningCue
+        ? `${warningCue}, and ${rainCue.toLowerCase()}. Keep the route short, start early, and stay ready to turn back once the weather starts shifting.`
+        : `${rainCue}. Keep the route short, start early, and stay ready to turn back once the weather starts shifting.`,
+      cues: [warningCueLabel, rainCueLabel, airCueLabel],
     }
   }
 
   return {
     target,
     verdict: 'Go',
-    confidence: 86,
-    title: 'This is a reasonable outdoor window.',
-    reason:
-      'The current mix of forecast, air quality, and warnings does not show a strong reason to avoid the trip. Keep normal rain gear on hand and recheck later in the day.',
+    confidence: 84,
+    title: 'The next several hours look workable for a hike.',
+    reason: `No location-specific warning is active, AQI is ${snapshot.aqi}, and ${formatWetSlotCue(nextWetSlot).toLowerCase()} Recheck once before you head out and keep normal rain gear with you.`,
+    cues: [warningCueLabel, airCueLabel, rainCueLabel],
   }
 }
 
@@ -628,8 +1015,19 @@ export async function buildDashboardPayload(
     ...fallbackPayload.meta.providers,
   }
 
+  const now = new Date()
   const servedAt = new Date().toISOString()
   const openWeatherApiKey = process.env.OPENWEATHER_API_KEY
+  let warningSignals = {
+    activeWarning: null as WarningSignal | null,
+    nextWarning: null as WarningSignal | null,
+    highestWarningSeverity: null as Severity | null,
+  }
+  let wetSignals = {
+    nextWetSlot: null as WetSlotSignal | null,
+    heaviestWetSlot: null as WetSlotSignal | null,
+    wetSlotCount: 0,
+  }
 
   const [malaysiaForecastResult, malaysiaWarningsResult, openWeatherForecastResult, openWeatherAirResult] =
     await Promise.allSettled([
@@ -649,6 +1047,7 @@ export async function buildDashboardPayload(
   ) {
     const malaysiaForecast = malaysiaForecastResult.value
     snapshot.forecast = normalizeMalaysiaForecast(malaysiaForecast, snapshot.forecast)
+    snapshot.currentTemp = estimateCurrentTempFromForecastDay(snapshot.forecast[0])
     providers.malaysiaForecast = 'live'
 
     if (malaysiaForecast[0]) {
@@ -659,10 +1058,13 @@ export async function buildDashboardPayload(
   }
 
   if (malaysiaWarningsResult.status === 'fulfilled') {
-    snapshot.warnings = normalizeMalaysiaWarnings(
+    const relevantWarnings = getRelevantMalaysiaWarnings(
       malaysiaWarningsResult.value,
       location,
     )
+
+    snapshot.warnings = normalizeMalaysiaWarnings(malaysiaWarningsResult.value, location)
+    warningSignals = buildWarningDecisionSignals(relevantWarnings, now)
     providers.malaysiaWarnings = 'live'
   }
 
@@ -671,9 +1073,13 @@ export async function buildDashboardPayload(
     openWeatherForecastResult.value
   ) {
     snapshot.forecast = normalizeOpenWeatherForecast(openWeatherForecastResult.value)
+    snapshot.currentTemp =
+      getCurrentTempFromOpenWeather(openWeatherForecastResult.value, now) ??
+      estimateCurrentTempFromForecastDay(snapshot.forecast[0])
     snapshot.nextRainWindow = buildNextRainWindowFromOpenWeather(
       openWeatherForecastResult.value,
     )
+    wetSignals = buildWetSlotDecisionSignals(openWeatherForecastResult.value, now)
     providers.openWeatherForecast = 'live'
   }
 
@@ -705,7 +1111,15 @@ export async function buildDashboardPayload(
     snapshot.updatedAt = servedAt
     snapshot.cacheAgeMinutes = 0
     snapshot.overview = buildOverview(snapshot)
-    snapshot.hikeTip = buildHikeTip(snapshot, snapshot.hikeTip.target)
+    snapshot.hikeTip = buildHikeTip(snapshot, snapshot.hikeTip.target, {
+      now,
+      nextWetSlot: wetSignals.nextWetSlot,
+      heaviestWetSlot: wetSignals.heaviestWetSlot,
+      wetSlotCount: wetSignals.wetSlotCount,
+      activeWarning: warningSignals.activeWarning,
+      nextWarning: warningSignals.nextWarning,
+      highestWarningSeverity: warningSignals.highestWarningSeverity,
+    })
   }
 
   return {

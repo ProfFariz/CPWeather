@@ -1,94 +1,183 @@
 # CPWeather
 
-Perak Weather + API Dashboard focused on the things that matter locally: haze, sudden rain, air quality, and whether an outdoor plan still makes sense today.
+CPWeather is a Perak-focused weather dashboard built for the things that actually affect local plans: haze, sudden rain, live warnings, and whether today still feels safe for an outdoor trip.
 
-## Project Goal
+The current experience is a glassmorphism dashboard with Tapah as the default view, a live temperature hero, a vertical 5-day forecast, a forecast chart, warning detail, air-quality status, and a hiking recommendation that explains itself.
 
-Most generic weather apps stop at temperature and icons. This project is meant to be more useful for Perak users by combining:
+## Presentation Summary
 
-- 5-day weather forecast
-- air-quality insight
-- local weather warning context
-- a practical trip tip such as "can I hike today?"
+- Problem: generic weather apps do not answer local questions like haze risk, rain timing, and "should I still go out today?"
+- Solution: combine OpenWeather and Malaysia weather data into one frontend dashboard with a practical decision layer.
+- Frontend signal: React, TypeScript, Tailwind, Chart.js, fetch, responsive layout, local caching, API normalization.
+- Product signal: clear hierarchy, live data, explainable hiking verdict, graceful fallback behavior.
 
-The main portfolio signal is strong front-end fundamentals:
+## What A User Can Do In The App
 
-- API integration
-- data normalization
-- Chart.js data visualization
-- responsive UI
-- local caching
-- server/client separation for secrets
+- Open the dashboard and immediately see the latest Tapah weather briefing.
+- Switch between Tapah, Ipoh, Taiping, and Lumut.
+- View the current temperature, overview, and next rain window.
+- Check AQI and pollutant-related outdoor comfort.
+- Read location-specific warning cards from Malaysia weather data.
+- See a 5-day forecast sidebar and a forecast chart.
+- Get a hiking verdict such as `Go`, `Caution`, or `Skip`.
+- Read the reasons behind the hiking verdict through cue chips and explanation text.
+- Refresh the dashboard manually if needed.
+- Continue using recent cached data if a live request temporarily fails.
 
-## Current Status
+## Simple User Flow
 
-What is already done:
+1. The user opens the app.
+2. The frontend checks `localStorage` for a recent dashboard payload for the selected location.
+3. If fresh cached data exists, it renders immediately.
+4. The frontend then fetches `/api/dashboard?location=...`.
+5. The backend combines live weather providers into one shared response.
+6. The frontend renders the glass dashboard cards, chart, warnings, and hiking tip.
+7. The latest payload is written back to cache for the next visit.
 
-- React + TypeScript + Vite app scaffolded in this repo
-- Tailwind CSS wired into Vite
-- mock dashboard UI built
-- shared dashboard response contract created
-- `/api/dashboard` endpoint created
-- frontend now fetches `/api/dashboard`
-- `localStorage` caching added with a 15-minute TTL
-- live Malaysia forecast and warning aggregation added on the server
-- hybrid mode works even without an OpenWeather key
-- loading, error, retry, and empty states added
-- local Vite dev server can serve `/api/dashboard`
-- project passes `pnpm lint`
-- project passes `pnpm build`
+## Simple Developer Flow
 
-What is not done yet:
+1. The frontend calls `/api/dashboard`.
+2. [api/dashboard.ts](./api/dashboard.ts) validates the request and hands work to the service layer.
+3. [api/dashboardService.ts](./api/dashboardService.ts) fetches:
+   - OpenWeather forecast
+   - OpenWeather air pollution
+   - Malaysia forecast
+   - Malaysia warnings
+4. The service normalizes those sources into the shared contract in [src/shared/dashboard.ts](./src/shared/dashboard.ts).
+5. The service computes:
+   - `currentTemp`
+   - `overview`
+   - `nextRainWindow`
+   - `warning feed`
+   - `hikeTip`
+6. The frontend in [src/App.tsx](./src/App.tsx) renders one stable payload shape, without caring which provider produced each field.
+7. [src/lib/dashboardCache.ts](./src/lib/dashboardCache.ts) stores the response locally for a 15-minute TTL.
 
-- real OpenWeather integration with a local or deployed API key
-- refine the live hiking-decision rules
-- `.env.local` setup for live keys
-- deployment to Vercel
-- final README screenshots and attribution polish
+## System Flow
 
-Important note:
+```mermaid
+flowchart LR
+  A["User opens dashboard"] --> B["Frontend loads App.tsx"]
+  B --> C{"Fresh local cache exists?"}
+  C -- Yes --> D["Render cached dashboard"]
+  C -- No --> E["Fetch /api/dashboard?location=..."]
+  D --> E
+  E --> F["api/dashboard.ts validates location"]
+  F --> G["api/dashboardService.ts aggregates providers"]
+  G --> H["OpenWeather forecast + air"]
+  G --> I["Malaysia forecast + warnings"]
+  H --> J["Normalize into DashboardPayload"]
+  I --> J
+  J --> K["Compute temp, rain window, warnings, hike tip"]
+  K --> L["Return shared payload"]
+  L --> M["Frontend renders glass dashboard"]
+  M --> N["Save payload into localStorage cache"]
+```
 
-- The frontend is already using the API route.
-- The API route can now return `mock`, `hybrid`, or `live` data depending on which providers are available.
+## Current Features
 
-## Stack
+- React + TypeScript + Vite app scaffolded and working.
+- Tailwind CSS integrated through Vite.
+- Glassmorphism interface with pastel blue background and white translucent cards.
+- Tapah-first landing experience with live hero temperature.
+- Vertical 5-day forecast sidebar.
+- Forecast chart using Chart.js.
+- Live warning feed panel.
+- Air-quality widget and rain window widget.
+- Shared typed dashboard contract used by frontend and backend.
+- `/api/dashboard` route for unified data access.
+- Malaysia forecast and warning integration.
+- OpenWeather forecast and air-pollution integration.
+- Explainable hiking verdict logic based on warnings, AQI, and rain timing.
+- `localStorage` caching with a 15-minute TTL and stale fallback behavior.
+- Loading, error, retry, and empty-state handling.
+- `pnpm lint` passing.
+- `pnpm build` passing.
+
+## Current Locations
+
+- Tapah
+- Ipoh
+- Taiping
+- Lumut
+
+## Current Dashboard Sections
+
+- Main weather hero
+- Hiking outlook card
+- Air quality widget
+- Rain window widget
+- Warning summary widget
+- 5-day forecast sidebar
+- Forecast trend chart
+- Live warning feed
+
+## API Route
+
+Supported requests:
+
+```text
+GET /api/dashboard
+GET /api/dashboard?location=tapah
+GET /api/dashboard?location=ipoh
+GET /api/dashboard?location=taiping
+GET /api/dashboard?location=lumut
+```
+
+Current behavior:
+
+- defaults to `tapah` if no location is provided
+- returns one normalized dashboard payload
+- can return `mock`, `hybrid`, or `live` in `meta.source`
+- rejects unsupported locations with `400 INVALID_LOCATION`
+- rejects non-GET requests with `405 METHOD_NOT_ALLOWED`
+
+## Shared Data Contract
+
+The shared response shape lives in [src/shared/dashboard.ts](./src/shared/dashboard.ts).
+
+The important top-level fields are:
+
+- `locationKey`
+- `locations`
+- `snapshot`
+- `meta`
+
+The important `snapshot` fields are:
+
+- `label`
+- `district`
+- `currentTemp`
+- `overview`
+- `nextRainWindow`
+- `aqi`
+- `airBand`
+- `pollutants`
+- `hikeTip`
+- `warnings`
+- `forecast`
+
+This shared contract is important because it keeps the UI stable even when provider logic changes behind the scenes.
+
+## Tech Stack
 
 - React 19
 - TypeScript
 - Vite
 - Tailwind CSS
 - Chart.js
-- `fetch`
-- `dayjs`
+- react-chartjs-2
+- fetch API
+- dayjs
+- localStorage caching
 
-## Product Scope
-
-The MVP dashboard should answer:
-
-1. What does the next 5 days look like?
-2. Is the air quality okay?
-3. Are there any warnings I should care about?
-4. Is today still a good day for an outdoor plan?
-
-Current sample locations:
-
-- Ipoh
-- Taiping
-- Lumut
-
-Current outdoor examples:
-
-- Cameron Highlands
-- Bukit Larut
-- Teluk Batik coastal trail
-
-## Folder Structure
+## Key Files
 
 ```text
 CPWeather/
 |-- api/
-|   |-- dashboardService.ts
 |   |-- dashboard.ts
+|   |-- dashboardService.ts
 |   `-- locationConfig.ts
 |-- src/
 |   |-- lib/
@@ -99,88 +188,24 @@ CPWeather/
 |   |-- index.css
 |   `-- mockData.ts
 |-- vite.config.ts
-|-- package.json
+|-- .env.example
 `-- readme.md
 ```
 
-## Shared Contract
-
-The frontend and backend both use the same dashboard shape from:
-
-- `src/shared/dashboard.ts`
-
-That shared contract includes:
-
-- location list
-- active location key
-- current snapshot
-- source metadata
-- typed error payloads
-
-This is important because once real APIs are added, the UI should not care where the data came from. It should only care that the shape is stable.
-
-## API Route
-
-Current endpoint:
-
-```text
-GET /api/dashboard
-GET /api/dashboard?location=ipoh
-GET /api/dashboard?location=taiping
-GET /api/dashboard?location=lumut
-```
-
-Current behavior:
-
-- returns a dashboard payload for a valid location
-- can blend live Malaysia forecast and warning data into the response
-- falls back safely to mock values when a provider is unavailable
-- defaults to `ipoh` if no location is provided
-- returns `400 INVALID_LOCATION` for unsupported locations
-- returns `405 METHOD_NOT_ALLOWED` for non-GET requests
-
-## Planned Live Data Sources
-
-Planned integration:
+## Data Sources
 
 - OpenWeather 5-day forecast
 - OpenWeather air pollution
-- Malaysia weather or warning data via `data.gov.my` / MET Malaysia
-
-Planned server flow:
-
-1. Frontend calls `/api/dashboard`
-2. Server fetches third-party APIs
-3. Server normalizes the data into one dashboard payload
-4. Frontend renders that payload
-
-This keeps secret API keys out of the browser in production.
+- Malaysia forecast data
+- Malaysia warning data
 
 ## Setup
 
 ### Requirements
 
-- Node `22.12.0` recommended
+- Node `22.12.0`
 - `pnpm`
 - PowerShell on Windows
-
-### Important Node Reminder
-
-This machine had an older Node 18 install in `C:\Program Files\nodejs`.
-
-A PowerShell profile was added so new PowerShell terminals prioritize Node 22 first. If a terminal still shows Node 18, do this:
-
-```powershell
-. $PROFILE
-node -v
-where node
-```
-
-Expected result:
-
-```powershell
-v22.12.0
-```
 
 ### Install
 
@@ -208,109 +233,77 @@ pnpm build
 
 ## Environment Variables
 
-Not required for the current hybrid Malaysia integration, but needed for full OpenWeather live mode.
-
-Local env file:
+Create a local env file:
 
 ```text
 .env.local
 ```
 
-Current or planned variables:
+Set:
 
 ```text
-OPENWEATHER_API_KEY=your_key_here
+OPENWEATHER_API_KEY=your_real_key_here
 ```
 
-Example file:
+Important:
 
-```text
-.env.example
-```
+- keep the real key in `.env.local`, not `.env.example`
+- do not expose it through `VITE_*`
+- restart `pnpm dev` after env changes
 
-Malaysia weather data does not need a secret key for the current integration path.
+## Cache Behavior
 
-Do not expose secret keys through `VITE_*` variables for production use.
+- cache lives in `localStorage`
+- TTL is 15 minutes
+- cache key version is currently `v3`
+- fresh cache renders immediately
+- stale cache can still be shown if a live fetch fails
 
-## Current Frontend Behavior
+## Hiking Decision Logic
 
-The app now:
+The hiking tip is not random UI text. It is derived from:
 
-- fetches dashboard data from `/api/dashboard`
-- reuses fresh `localStorage` data for 15 minutes per location
-- falls back to stale cached data if refresh fails
-- can show `mock`, `hybrid`, or `live` source status
-- shows a first-load state while waiting for data
-- shows a retryable error state if the request fails
-- keeps the same main dashboard layout
-- shows source metadata such as whether the payload is mock or live
+- location-specific warning relevance
+- warning severity and timing
+- near-term rain timing
+- thunderstorm risk
+- AQI / air-band comfort
 
-## Next Steps
+Current verdicts:
 
-Recommended build order from here:
+- `Go`
+- `Caution`
+- `Skip`
 
-1. Add your OpenWeather key in `.env.local` to unlock full live mode
-2. Refine the live normalization rules and hiking-decision logic
-3. Add `.env.local` and Vercel environment variables
-4. Deploy to Vercel
-5. Add attribution, screenshots, and final polish
+The UI also shows cue chips so the user can understand why that verdict was chosen.
 
-## Hiking Tip Logic Plan
+## What Is Still Missing
 
-The final hiking tip should be explicit and explainable.
+- React error boundary for a safer full-app failure path
+- final Vercel deployment setup
+- mobile QA and cross-browser QA
+- README screenshots and provider attribution polish
+- optional stretch features:
+  - Supabase user preferences
+  - i18next
+  - PWA support
 
-Basic intended rule order:
+## Recommended Next Order
 
-1. Active weather warning has the highest priority
-2. AQI affects comfort and safety
-3. Rain timing affects whether the trip is still practical
-4. The UI should explain why the answer is yes, caution, or no
-
-## Caching Plan
-
-Planned client cache strategy:
-
-- store dashboard payload in `localStorage`
-- use a TTL of around 10 to 15 minutes
-- prefer cached data for fast repeat loads
-- refresh in background when stale
-- show stale data notice if live refresh fails
-
-Current implementation:
-
-- 15-minute per-location cache
-- stale cache fallback on fetch failure
-- manual retry can force a fresh network request
-
-## Deployment Plan
-
-Planned target:
-
-- Vercel
-
-Planned production model:
-
-- frontend served by Vercel
-- `/api/dashboard` runs as serverless function
-- secret API keys stored in Vercel environment variables
+1. Add a React error boundary.
+2. Test the full dashboard carefully on phone and desktop.
+3. Deploy to Vercel and set production env vars.
+4. Add screenshots and attribution.
+5. Only after the MVP is stable, decide on Supabase, i18n, and PWA.
 
 ## Things Not To Forget
 
-- use Node 22, not Node 18
-- `.env.example` exists, but `.env.local` still needs your real OpenWeather key
-- do not put secret weather keys in frontend `VITE_*` env vars
-- keep the frontend consuming the shared dashboard contract
-- add attribution for any provider that requires it
-- test mobile layout, not just desktop
-- keep the MVP focused before adding Supabase, i18n, or PWA work
-
-## Development Notes
-
-This project is being built iteratively:
-
-1. shape the UI with mock data
-2. create a stable shared contract
-3. switch frontend to API consumption
-4. replace mock API implementation with live integrations
-
-That approach keeps the UI moving early without blocking on API keys.
+- Use Node 22, not Node 18.
+- `.env.example` is only a template.
+- Put the real OpenWeather key in `.env.local`.
+- Restart the dev server after changing env vars.
+- Hard refresh the browser after major cache-shape changes.
+- Do not commit secrets.
+- Keep the shared contract stable when changing backend logic.
+- Test mobile layout, not just desktop.
+- Add provider attribution before shipping publicly.

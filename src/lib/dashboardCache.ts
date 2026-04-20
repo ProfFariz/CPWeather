@@ -3,7 +3,7 @@ import { type DashboardPayload, type LocationKey } from '../shared/dashboard.ts'
 export const DASHBOARD_CACHE_TTL_MINUTES = 15
 
 const DASHBOARD_CACHE_TTL_MS = DASHBOARD_CACHE_TTL_MINUTES * 60 * 1000
-const DASHBOARD_CACHE_PREFIX = 'cpweather.dashboard.v1'
+const DASHBOARD_CACHE_PREFIX = 'cpweather.dashboard.v3'
 
 type DashboardCacheRecord = {
   savedAt: string

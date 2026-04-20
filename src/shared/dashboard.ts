@@ -1,7 +1,8 @@
-export type LocationKey = 'ipoh' | 'taiping' | 'lumut'
+export type LocationKey = 'tapah' | 'ipoh' | 'taiping' | 'lumut'
 export type Severity = 'Monitor' | 'Watch' | 'Alert'
 export type AirBand = 'Good' | 'Moderate' | 'Poor'
 export type HikeVerdict = 'Go' | 'Caution' | 'Skip'
+export type HikeCueTone = 'positive' | 'neutral' | 'caution' | 'danger'
 export type DashboardSource = 'mock' | 'hybrid' | 'live'
 export type DashboardProviderSource = 'live' | 'mock' | 'unavailable'
 
@@ -27,6 +28,10 @@ export type HikeTip = {
   confidence: number
   title: string
   reason: string
+  cues: Array<{
+    label: string
+    tone: HikeCueTone
+  }>
 }
 
 export type PollutantBreakdown = {
@@ -48,6 +53,7 @@ export type LocationSnapshot = {
   cacheAgeMinutes: number
   overview: string
   nextRainWindow: string
+  currentTemp: number
   aqi: number
   airBand: AirBand
   pollutants: PollutantBreakdown
@@ -87,9 +93,10 @@ export type DashboardErrorPayload = {
   }
 }
 
-export const defaultLocationKey: LocationKey = 'ipoh'
+export const defaultLocationKey: LocationKey = 'tapah'
 
 export const locations: LocationOption[] = [
+  { key: 'tapah', label: 'Tapah' },
   { key: 'ipoh', label: 'Ipoh' },
   { key: 'taiping', label: 'Taiping' },
   { key: 'lumut', label: 'Lumut' },

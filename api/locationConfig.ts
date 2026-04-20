@@ -58,6 +58,14 @@ export const liveLocationConfig: Record<LocationKey, LiveLocationConfig> = {
     hikeTarget: 'Royal Belum trail',
     warningAliases: ['Gerik', 'Grik', 'Hulu Perak', 'Royal Belum', 'Belum'],
   },
+  'kampong-gajah': {
+    key: 'kampong-gajah',
+    lat: 4.1849,
+    lon: 100.9381,
+    malaysiaLocationName: 'Kampong Gajah',
+    hikeTarget: 'Bukit Tunggal',
+    warningAliases: ['Kampong Gajah', 'Kampung Gajah', 'Perak Tengah', 'Pasir Salak', 'Bota'],
+  },
   sungkai: {
     key: 'sungkai',
     lat: 3.9973,

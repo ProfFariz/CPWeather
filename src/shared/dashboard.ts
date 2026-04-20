@@ -5,6 +5,7 @@ export type LocationKey =
   | 'lumut'
   | 'gopeng'
   | 'gerik'
+  | 'kampong-gajah'
   | 'sungkai'
   | 'teluk-intan'
 export type DashboardLocale = 'en' | 'bm'
@@ -114,6 +115,7 @@ export const locations: LocationOption[] = [
   { key: 'lumut', label: 'Lumut' },
   { key: 'gopeng', label: 'Gopeng' },
   { key: 'gerik', label: 'Gerik' },
+  { key: 'kampong-gajah', label: 'Kampong Gajah' },
   { key: 'sungkai', label: 'Sungkai' },
   { key: 'teluk-intan', label: 'Teluk Intan' },
 ]

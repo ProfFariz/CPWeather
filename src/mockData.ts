@@ -310,6 +310,49 @@ export const dashboardMocks = {
       { date: '2026-04-21', high: 29, low: 22, rainChance: 53, humidity: 85, summary: 'Wet forest afternoon' },
     ],
   },
+  'kampong-gajah': {
+    label: 'Kampong Gajah',
+    district: 'Perak Tengah, Perak',
+    updatedAt: '2026-04-17T09:16:00+08:00',
+    cacheAgeMinutes: 7,
+    overview:
+      'River plain heat builds steadily through the day, but the morning still holds a calmer outdoor window before heavier inland cells form later.',
+    nextRainWindow: 'Best dry window: 8 AM to 12 PM',
+    currentTemp: 30,
+    currentSummary: 'Warm river air with scattered bright cloud',
+    aqi: 49,
+    airBand: 'Good',
+    pollutants: { pm25: 13, pm10: 24, o3: 12, no2: 6 },
+    hikeTip: {
+      target: 'Bukit Tunggal',
+      verdict: 'Caution',
+      confidence: 78,
+      title: 'The morning still works better than the later day here.',
+      reason:
+        'Air quality stays comfortable, but lowland humidity and inland rain build-up can make the outdoor window close quickly after midday.',
+      cues: [
+        { label: 'AQI 49 good', tone: 'positive' },
+        { label: 'Best before noon', tone: 'positive' },
+        { label: 'Rain builds later inland', tone: 'caution' },
+      ],
+    },
+    warnings: [
+      {
+        title: 'Late-day thunder cells across Perak Tengah',
+        severity: 'Monitor',
+        window: '2 PM - 6 PM',
+        message:
+          'Short riverside outings still work early, but later storms can spread in quickly and make exposed stretches less comfortable.',
+      },
+    ],
+    forecast: [
+      { date: '2026-04-17', high: 32, low: 24, rainChance: 48, humidity: 79, summary: 'Warm with later showers' },
+      { date: '2026-04-18', high: 32, low: 24, rainChance: 45, humidity: 78, summary: 'Humid river plain cloud' },
+      { date: '2026-04-19', high: 33, low: 24, rainChance: 33, humidity: 74, summary: 'Brighter morning window' },
+      { date: '2026-04-20', high: 32, low: 24, rainChance: 42, humidity: 77, summary: 'Afternoon shower chance' },
+      { date: '2026-04-21', high: 31, low: 24, rainChance: 56, humidity: 80, summary: 'Storm risk returns' },
+    ],
+  },
   sungkai: {
     label: 'Sungkai',
     district: 'Batang Padang, Perak',

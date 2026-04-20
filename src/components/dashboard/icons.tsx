@@ -1,9 +1,26 @@
-export function WeatherIcon() {
+type IconProps = {
+  className?: string
+}
+
+export function WeatherIcon({ className = '' }: IconProps) {
   return (
-    <svg viewBox="0 0 48 48" className="h-7 w-7" fill="none" aria-hidden="true">
-      <circle cx="19" cy="18" r="7" fill="currentColor" fillOpacity="0.95" />
+    <svg
+      viewBox="0 0 48 48"
+      className={`h-7 w-7 ${className}`.trim()}
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="19"
+        cy="18"
+        r="7"
+        className="weather-icon-sun"
+        fill="currentColor"
+        fillOpacity="0.95"
+      />
       <path
         d="M14 30.5C14 26.91 16.91 24 20.5 24C22.28 24 23.89 24.71 25.06 25.86C26.07 23.57 28.36 22 31 22C34.87 22 38 25.13 38 29C38 29.52 37.94 30.03 37.83 30.52C39.11 31.26 40 32.64 40 34.23C40 36.59 38.09 38.5 35.73 38.5H18.5C16.01 38.5 14 36.49 14 34V30.5Z"
+        className="weather-icon-cloud"
         fill="currentColor"
         fillOpacity="0.42"
       />
@@ -245,6 +262,20 @@ export function ChevronDownIcon() {
         d="M7 10l5 5 5-5"
         stroke="currentColor"
         strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function CheckIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
+      <path
+        d="M6.5 12.5l3.4 3.4 7.6-8"
+        stroke="currentColor"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

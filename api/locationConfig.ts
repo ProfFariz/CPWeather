@@ -5,6 +5,7 @@ export type LiveLocationConfig = {
   lat: number
   lon: number
   malaysiaLocationName: string
+  hikeTarget: string
   warningAliases: string[]
 }
 
@@ -14,6 +15,7 @@ export const liveLocationConfig: Record<LocationKey, LiveLocationConfig> = {
     lat: 4.1972,
     lon: 101.2559,
     malaysiaLocationName: 'Tapah',
+    hikeTarget: 'Lata Iskandar route',
     warningAliases: ['Tapah', 'Batang Padang', 'Muallim'],
   },
   ipoh: {
@@ -21,6 +23,7 @@ export const liveLocationConfig: Record<LocationKey, LiveLocationConfig> = {
     lat: 4.5975,
     lon: 101.0901,
     malaysiaLocationName: 'Ipoh',
+    hikeTarget: 'Kledang Hill route',
     warningAliases: ['Ipoh', 'Kinta', 'Kampar', 'Kuala Kangsar'],
   },
   taiping: {
@@ -28,6 +31,7 @@ export const liveLocationConfig: Record<LocationKey, LiveLocationConfig> = {
     lat: 4.85,
     lon: 100.7333,
     malaysiaLocationName: 'Taiping',
+    hikeTarget: 'Bukit Larut route',
     warningAliases: ['Taiping', 'Larut', 'Matang', 'Selama'],
   },
   lumut: {
@@ -35,6 +39,39 @@ export const liveLocationConfig: Record<LocationKey, LiveLocationConfig> = {
     lat: 4.2323,
     lon: 100.6298,
     malaysiaLocationName: 'Lumut',
+    hikeTarget: 'Teluk Batik coastal trail',
     warningAliases: ['Lumut', 'Manjung', 'Teluk Batik'],
+  },
+  gopeng: {
+    key: 'gopeng',
+    lat: 4.4698,
+    lon: 101.1647,
+    malaysiaLocationName: 'Gopeng',
+    hikeTarget: 'Gua Tempurung route',
+    warningAliases: ['Gopeng', 'Kampar', 'Kinta', 'Gua Tempurung'],
+  },
+  gerik: {
+    key: 'gerik',
+    lat: 5.4273,
+    lon: 101.1342,
+    malaysiaLocationName: 'Gerik',
+    hikeTarget: 'Royal Belum trail',
+    warningAliases: ['Gerik', 'Grik', 'Hulu Perak', 'Royal Belum', 'Belum'],
+  },
+  sungkai: {
+    key: 'sungkai',
+    lat: 3.9973,
+    lon: 101.3062,
+    malaysiaLocationName: 'Sungkai',
+    hikeTarget: 'Sungai Klah route',
+    warningAliases: ['Sungkai', 'Batang Padang', 'Slim River', 'Bidor'],
+  },
+  'teluk-intan': {
+    key: 'teluk-intan',
+    lat: 4.0222,
+    lon: 101.0208,
+    malaysiaLocationName: 'Teluk Intan',
+    hikeTarget: 'Kuala Gula boardwalk',
+    warningAliases: ['Teluk Intan', 'Hilir Perak', 'Kuala Gula', 'Hutan Melintang'],
   },
 }

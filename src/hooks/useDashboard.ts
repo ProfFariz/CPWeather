@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  type DashboardLocale,
   type DashboardPayload,
   type LocationKey,
 } from '../shared/dashboard.ts'
@@ -28,7 +29,10 @@ type UseDashboardResult = {
   refresh: () => void
 }
 
-export function useDashboard(selectedLocation: LocationKey): UseDashboardResult {
+export function useDashboard(
+  selectedLocation: LocationKey,
+  locale: DashboardLocale,
+): UseDashboardResult {
   const [requestVersion, setRequestVersion] = useState(0)
   const [payload, setPayload] = useState<DashboardPayload | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -47,7 +51,7 @@ export function useDashboard(selectedLocation: LocationKey): UseDashboardResult 
     activeRequestRef.current = requestId
 
     async function loadDashboard() {
-      const cachedDashboard = readDashboardCache(selectedLocation)
+      const cachedDashboard = readDashboardCache(selectedLocation, locale)
 
       if (cachedDashboard) {
         setPayload(cachedDashboard.payload)
@@ -73,7 +77,7 @@ export function useDashboard(selectedLocation: LocationKey): UseDashboardResult 
 
       try {
         const response = await fetch(
-          `/api/dashboard?location=${encodeURIComponent(selectedLocation)}`,
+          `/api/dashboard?location=${encodeURIComponent(selectedLocation)}&locale=${encodeURIComponent(locale)}`,
           {
             headers: {
               Accept: 'application/json',
@@ -87,13 +91,19 @@ export function useDashboard(selectedLocation: LocationKey): UseDashboardResult 
         if (!response.ok) {
           const message = isDashboardErrorPayload(data)
             ? data.error.message
-            : 'Dashboard request failed.'
+            : locale === 'bm'
+              ? 'Permintaan papan pemuka gagal.'
+              : 'Dashboard request failed.'
 
           throw new Error(message)
         }
 
         if (!isDashboardPayload(data)) {
-          throw new Error('Dashboard response shape is invalid.')
+          throw new Error(
+            locale === 'bm'
+              ? 'Bentuk respons papan pemuka tidak sah.'
+              : 'Dashboard response shape is invalid.',
+          )
         }
 
         if (controller.signal.aborted || activeRequestRef.current !== requestId) {
@@ -101,7 +111,7 @@ export function useDashboard(selectedLocation: LocationKey): UseDashboardResult 
         }
 
         setPayload(data)
-        const cachedRecord = writeDashboardCache(selectedLocation, data)
+        const cachedRecord = writeDashboardCache(selectedLocation, locale, data)
         setCacheInfo({
           status: 'network',
           savedAt: cachedRecord?.savedAt ?? new Date().toISOString(),
@@ -124,7 +134,11 @@ export function useDashboard(selectedLocation: LocationKey): UseDashboardResult 
           return
         }
 
-        setError('Something went wrong while loading dashboard data.')
+        setError(
+          locale === 'bm'
+            ? 'Sesuatu telah berlaku semasa memuatkan data papan pemuka.'
+            : 'Something went wrong while loading dashboard data.',
+        )
       } finally {
         if (!controller.signal.aborted && activeRequestRef.current === requestId) {
           setIsLoading(false)
@@ -138,7 +152,7 @@ export function useDashboard(selectedLocation: LocationKey): UseDashboardResult 
     return () => {
       controller.abort()
     }
-  }, [selectedLocation, requestVersion])
+  }, [locale, selectedLocation, requestVersion])
 
   function refresh() {
     setRequestVersion((version) => version + 1)

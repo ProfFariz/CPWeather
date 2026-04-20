@@ -1,10 +1,14 @@
-import { type DashboardPayload, type LocationKey } from '../shared/dashboard.ts'
+import {
+  type DashboardLocale,
+  type DashboardPayload,
+  type LocationKey,
+} from '../shared/dashboard.ts'
 import { isDashboardPayload } from '../shared/dashboardValidation.ts'
 
 export const DASHBOARD_CACHE_TTL_MINUTES = 15
 
 const DASHBOARD_CACHE_TTL_MS = DASHBOARD_CACHE_TTL_MINUTES * 60 * 1000
-const DASHBOARD_CACHE_PREFIX = 'cpweather.dashboard.v4'
+const DASHBOARD_CACHE_PREFIX = 'cpweather.dashboard.v5'
 
 type DashboardCacheRecord = {
   savedAt: string
@@ -28,12 +32,13 @@ function getStorage() {
   }
 }
 
-function getDashboardCacheKey(locationKey: LocationKey) {
-  return `${DASHBOARD_CACHE_PREFIX}.${locationKey}`
+function getDashboardCacheKey(locationKey: LocationKey, locale: DashboardLocale) {
+  return `${DASHBOARD_CACHE_PREFIX}.${locationKey}.${locale}`
 }
 
 export function readDashboardCache(
   locationKey: LocationKey,
+  locale: DashboardLocale,
 ): DashboardCacheResult | null {
   const storage = getStorage()
 
@@ -41,7 +46,7 @@ export function readDashboardCache(
     return null
   }
 
-  const rawValue = storage.getItem(getDashboardCacheKey(locationKey))
+  const rawValue = storage.getItem(getDashboardCacheKey(locationKey, locale))
 
   if (!rawValue) {
     return null
@@ -54,14 +59,14 @@ export function readDashboardCache(
       typeof parsed?.savedAt !== 'string' ||
       !isDashboardPayload(parsed.payload)
     ) {
-      storage.removeItem(getDashboardCacheKey(locationKey))
+      storage.removeItem(getDashboardCacheKey(locationKey, locale))
       return null
     }
 
     const savedAtMs = Date.parse(parsed.savedAt)
 
     if (Number.isNaN(savedAtMs)) {
-      storage.removeItem(getDashboardCacheKey(locationKey))
+      storage.removeItem(getDashboardCacheKey(locationKey, locale))
       return null
     }
 
@@ -74,13 +79,14 @@ export function readDashboardCache(
       isFresh: ageMs <= DASHBOARD_CACHE_TTL_MS,
     }
   } catch {
-    storage.removeItem(getDashboardCacheKey(locationKey))
+    storage.removeItem(getDashboardCacheKey(locationKey, locale))
     return null
   }
 }
 
 export function writeDashboardCache(
   locationKey: LocationKey,
+  locale: DashboardLocale,
   payload: DashboardPayload,
 ): DashboardCacheRecord | null {
   const storage = getStorage()
@@ -95,7 +101,7 @@ export function writeDashboardCache(
   }
 
   try {
-    storage.setItem(getDashboardCacheKey(locationKey), JSON.stringify(record))
+    storage.setItem(getDashboardCacheKey(locationKey, locale), JSON.stringify(record))
     return record
   } catch {
     return null

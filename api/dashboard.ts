@@ -1,10 +1,13 @@
 import { buildMockDashboardPayload } from '../src/mockData.ts'
 import { buildDashboardPayload } from './dashboardService.ts'
 import {
+  defaultDashboardLocale,
   defaultLocationKey,
+  isDashboardLocale,
   isLocationKey,
   locations,
   type DashboardErrorPayload,
+  type DashboardLocale,
   type DashboardPayload,
 } from '../src/shared/dashboard.ts'
 import { isDashboardPayload } from '../src/shared/dashboardValidation.ts'
@@ -41,6 +44,27 @@ function getRequestedLocation(req: ApiRequest): string | undefined {
   return requestUrl.searchParams.get('location') ?? undefined
 }
 
+function getRequestedLocale(req: ApiRequest): DashboardLocale {
+  const rawQueryValue = req.query?.locale
+
+  if (typeof rawQueryValue === 'string' && isDashboardLocale(rawQueryValue)) {
+    return rawQueryValue
+  }
+
+  if (Array.isArray(rawQueryValue) && rawQueryValue[0] && isDashboardLocale(rawQueryValue[0])) {
+    return rawQueryValue[0]
+  }
+
+  if (!req.url) {
+    return defaultDashboardLocale
+  }
+
+  const requestUrl = new URL(req.url, 'http://localhost')
+  const locale = requestUrl.searchParams.get('locale')
+
+  return locale && isDashboardLocale(locale) ? locale : defaultDashboardLocale
+}
+
 function sendJson(
   res: ApiResponse,
   statusCode: number,
@@ -71,6 +95,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   const requestedLocation = getRequestedLocation(req)
+  const locale = getRequestedLocale(req)
   const locationKey = requestedLocation ?? defaultLocationKey
 
   if (!isLocationKey(locationKey)) {
@@ -87,7 +112,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   try {
-    const payload = await buildDashboardPayload(locationKey)
+    const payload = await buildDashboardPayload(locationKey, locale)
 
     if (!isDashboardPayload(payload)) {
       throw new Error('Dashboard payload validation failed.')
@@ -96,6 +121,6 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     sendJson(res, 200, payload)
     return
   } catch {
-    sendJson(res, 200, buildMockDashboardPayload(locationKey))
+    sendJson(res, 200, buildMockDashboardPayload(locationKey, locale))
   }
 }

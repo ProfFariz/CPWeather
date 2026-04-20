@@ -81,7 +81,7 @@ export function DashboardHero({
     <section className="glass-panel min-w-0 overflow-hidden p-5 sm:p-8">
       <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_17rem] md:items-start lg:gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="hero-fade-up hero-delay-1 flex flex-wrap items-center gap-3">
             <span className="glass-chip text-xs font-semibold uppercase tracking-[0.28em] text-sky-700">
               {selectedLocationLabel}, Perak
             </span>
@@ -91,11 +91,16 @@ export function DashboardHero({
           </div>
 
           <div className="mt-7 flex flex-col gap-5 sm:flex-row sm:items-start">
-            <div className="accent-orb accent-orb-drift hidden sm:flex">
-              <WeatherIcon />
+            <div className="hero-fade-up hero-delay-2 hidden sm:block">
+              <div className="accent-orb accent-orb-drift flex">
+                <WeatherIcon className="hero-weather-icon hero-weather-icon-enter" />
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-sky-700/80">
+            <div
+              key={`${selectedLocationLabel}-${currentSummary}-${heroTemperature}`}
+              className="hero-fade-up hero-delay-3 min-w-0"
+            >
+              <p className="hero-copy-slide text-sm font-semibold uppercase tracking-[0.28em] text-sky-700/80">
                 {weatherAccent(currentSummary, locale)}
               </p>
               <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start">
@@ -104,8 +109,10 @@ export function DashboardHero({
                   {'\u00B0'}
                 </span>
                 <div className="min-w-0 pt-0 sm:pt-4">
-                  <p className="text-lg font-semibold text-slate-900">{currentSummary}</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                  <p className="hero-copy-slide hero-copy-delay-2 text-lg font-semibold text-slate-900">
+                    {currentSummary}
+                  </p>
+                  <p className="hero-copy-slide hero-copy-delay-3 mt-2 text-sm leading-7 text-slate-600">
                     {snapshot.overview}
                   </p>
                 </div>
@@ -125,7 +132,7 @@ export function DashboardHero({
           </div>
         </div>
 
-        <div className="glass-inner-panel min-w-0 self-start p-4 sm:p-5">
+        <div className="hero-fade-up hero-delay-4 glass-inner-panel min-w-0 self-start p-4 sm:p-5">
           <div className="flex items-start gap-3 text-sky-600">
             <span className="icon-pill shrink-0">
               <TrailIcon />

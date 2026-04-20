@@ -32,7 +32,7 @@ function App() {
     error,
     cacheInfo,
     refresh,
-  } = useDashboard(selectedLocation)
+  } = useDashboard(selectedLocation, locale)
   const copy = getDashboardCopy(locale)
 
   const activeLocations = payload?.locations ?? locations

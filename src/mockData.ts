@@ -1,5 +1,6 @@
 import {
   defaultLocationKey,
+  type DashboardLocale,
   locations,
   type AirBand,
   type DashboardPayload,
@@ -101,7 +102,7 @@ export const dashboardMocks = {
     airBand: 'Moderate',
     pollutants: { pm25: 19, pm10: 33, o3: 17, no2: 9 },
     hikeTip: {
-      target: 'Cameron Highlands',
+      target: 'Kledang Hill route',
       verdict: 'Caution',
       confidence: 71,
       title: 'Leave early if you still want the trip.',
@@ -223,6 +224,178 @@ export const dashboardMocks = {
       { date: '2026-04-21', high: 31, low: 25, rainChance: 44, humidity: 77, summary: 'Evening storm chance' },
     ],
   },
+  gopeng: {
+    label: 'Gopeng',
+    district: 'Kampar, Perak',
+    updatedAt: '2026-04-17T09:12:00+08:00',
+    cacheAgeMinutes: 7,
+    overview:
+      'The valley starts calmer in the morning, but cloud build-up around the limestone belt can flip the cave and forest window quickly by afternoon.',
+    nextRainWindow: 'Best dry window: 8 AM to 1 PM',
+    currentTemp: 28,
+    currentSummary: 'Warm morning with lighter valley haze',
+    aqi: 58,
+    airBand: 'Moderate',
+    pollutants: { pm25: 16, pm10: 29, o3: 15, no2: 7 },
+    hikeTip: {
+      target: 'Gua Tempurung route',
+      verdict: 'Caution',
+      confidence: 78,
+      title: 'This works best as an early half-day outing.',
+      reason:
+        'The early slot is still manageable, but humidity and afternoon storm build-up can make the route feel heavier later in the day.',
+      cues: [
+        { label: 'AQI 58 moderate', tone: 'caution' },
+        { label: 'Better before 1 PM', tone: 'positive' },
+        { label: 'Storm chance later', tone: 'caution' },
+      ],
+    },
+    warnings: [
+      {
+        title: 'Late-afternoon thunder cells near the valley rim',
+        severity: 'Monitor',
+        window: '2 PM - 6 PM',
+        message:
+          'Keep cave and river plans early, as lightning pockets can build around the surrounding hills after lunch.',
+      },
+    ],
+    forecast: [
+      { date: '2026-04-17', high: 32, low: 24, rainChance: 56, humidity: 79, summary: 'Warm with storm risk later' },
+      { date: '2026-04-18', high: 31, low: 24, rainChance: 52, humidity: 77, summary: 'Humid with scattered rain' },
+      { date: '2026-04-19', high: 31, low: 23, rainChance: 36, humidity: 74, summary: 'Cloudy breaks' },
+      { date: '2026-04-20', high: 32, low: 24, rainChance: 47, humidity: 76, summary: 'Late shower chance' },
+      { date: '2026-04-21', high: 32, low: 24, rainChance: 61, humidity: 80, summary: 'Storm band returns' },
+    ],
+  },
+  gerik: {
+    label: 'Gerik',
+    district: 'Hulu Perak, Perak',
+    updatedAt: '2026-04-17T09:08:00+08:00',
+    cacheAgeMinutes: 6,
+    overview:
+      'Royal Belum holds a cooler start than the lowlands, but rain cells over the forest edge can still become heavy once the afternoon develops.',
+    nextRainWindow: 'Best dry window: 7 AM to 12 PM',
+    currentTemp: 26,
+    currentSummary: 'Cooler rainforest morning',
+    aqi: 34,
+    airBand: 'Good',
+    pollutants: { pm25: 9, pm10: 17, o3: 9, no2: 4 },
+    hikeTip: {
+      target: 'Royal Belum trail',
+      verdict: 'Go',
+      confidence: 83,
+      title: 'This is one of the better outdoor windows in the state.',
+      reason:
+        'Air stays cleaner here than most other locations, and the usable forest window usually lasts until midday if you start early.',
+      cues: [
+        { label: 'AQI 34 good', tone: 'positive' },
+        { label: 'Strong early window', tone: 'positive' },
+        { label: 'Watch rain after noon', tone: 'neutral' },
+      ],
+    },
+    warnings: [
+      {
+        title: 'Forest-edge rain pockets after midday',
+        severity: 'Monitor',
+        window: '1 PM - 5 PM',
+        message:
+          'Trails deeper into the park can turn slippery after lunch, so longer treks should wrap before the afternoon wet phase.',
+      },
+    ],
+    forecast: [
+      { date: '2026-04-17', high: 30, low: 22, rainChance: 41, humidity: 83, summary: 'Cooler start, showers later' },
+      { date: '2026-04-18', high: 29, low: 22, rainChance: 49, humidity: 84, summary: 'Rain over the forest edge' },
+      { date: '2026-04-19', high: 30, low: 21, rainChance: 34, humidity: 80, summary: 'Cloudy with brighter gaps' },
+      { date: '2026-04-20', high: 30, low: 22, rainChance: 45, humidity: 82, summary: 'Afternoon rain risk' },
+      { date: '2026-04-21', high: 29, low: 22, rainChance: 53, humidity: 85, summary: 'Wet forest afternoon' },
+    ],
+  },
+  sungkai: {
+    label: 'Sungkai',
+    district: 'Batang Padang, Perak',
+    updatedAt: '2026-04-17T09:18:00+08:00',
+    cacheAgeMinutes: 5,
+    overview:
+      'The foothill weather is usable through the morning, but steamier air and later thunder pockets make the park feel much less forgiving after lunch.',
+    nextRainWindow: 'Best dry window: 8 AM to 1 PM',
+    currentTemp: 29,
+    currentSummary: 'Warm foothill air with brighter patches',
+    aqi: 47,
+    airBand: 'Good',
+    pollutants: { pm25: 13, pm10: 22, o3: 12, no2: 5 },
+    hikeTip: {
+      target: 'Sungai Klah route',
+      verdict: 'Caution',
+      confidence: 79,
+      title: 'The first half of the day is the safest window here.',
+      reason:
+        'The morning looks workable, but rain and thunder build faster over the surrounding hills once the day heats up.',
+      cues: [
+        { label: 'AQI 47 good', tone: 'positive' },
+        { label: 'Morning slot is best', tone: 'positive' },
+        { label: 'Storm pockets later', tone: 'caution' },
+      ],
+    },
+    warnings: [
+      {
+        title: 'Afternoon thunderstorm build-up over the foothills',
+        severity: 'Watch',
+        window: '2 PM - 6 PM',
+        message:
+          'Roadside spray and lightning are the main concerns later in the day, so keep the outing early and flexible.',
+      },
+    ],
+    forecast: [
+      { date: '2026-04-17', high: 32, low: 24, rainChance: 59, humidity: 78, summary: 'Heat, then storm pockets' },
+      { date: '2026-04-18', high: 31, low: 24, rainChance: 54, humidity: 79, summary: 'Scattered late rain' },
+      { date: '2026-04-19', high: 31, low: 23, rainChance: 39, humidity: 75, summary: 'Warm with cloud breaks' },
+      { date: '2026-04-20', high: 32, low: 24, rainChance: 46, humidity: 77, summary: 'Humid afternoon risk' },
+      { date: '2026-04-21', high: 32, low: 24, rainChance: 63, humidity: 81, summary: 'Storms return late' },
+    ],
+  },
+  'teluk-intan': {
+    label: 'Teluk Intan',
+    district: 'Hilir Perak, Perak',
+    updatedAt: '2026-04-17T09:14:00+08:00',
+    cacheAgeMinutes: 8,
+    overview:
+      'Lowland river heat builds steadily here, but the coastward air still gives you a usable morning window before heavier cloud bands form later.',
+    nextRainWindow: 'Best dry window: 8 AM to 12 PM',
+    currentTemp: 30,
+    currentSummary: 'Warm river breeze with light cloud cover',
+    aqi: 52,
+    airBand: 'Moderate',
+    pollutants: { pm25: 15, pm10: 28, o3: 13, no2: 6 },
+    hikeTip: {
+      target: 'Kuala Gula boardwalk',
+      verdict: 'Caution',
+      confidence: 77,
+      title: 'A shorter coastal nature window still works this morning.',
+      reason:
+        'The early stretch is manageable, but humidity rises quickly and rain bands can close the outdoor window faster later in the day.',
+      cues: [
+        { label: 'AQI 52 moderate', tone: 'caution' },
+        { label: 'Dry slot before noon', tone: 'positive' },
+        { label: 'Late rain band inland', tone: 'caution' },
+      ],
+    },
+    warnings: [
+      {
+        title: 'Localized late-day rain cells over Hilir Perak',
+        severity: 'Monitor',
+        window: '3 PM - 7 PM',
+        message:
+          'Short outdoor loops still work early, but later rain can spread in from inland districts and reduce visibility quickly.',
+      },
+    ],
+    forecast: [
+      { date: '2026-04-17', high: 32, low: 24, rainChance: 51, humidity: 79, summary: 'Warm with later showers' },
+      { date: '2026-04-18', high: 31, low: 24, rainChance: 48, humidity: 78, summary: 'Humid coastal cloud' },
+      { date: '2026-04-19', high: 32, low: 24, rainChance: 34, humidity: 75, summary: 'Brighter river morning' },
+      { date: '2026-04-20', high: 32, low: 24, rainChance: 43, humidity: 77, summary: 'Late shower chance' },
+      { date: '2026-04-21', high: 31, low: 24, rainChance: 57, humidity: 80, summary: 'Rain band returns' },
+    ],
+  },
 } satisfies Record<LocationKey, LocationSnapshot>
 
 export const severityClasses: Record<Severity, string> = {
@@ -262,7 +435,10 @@ export function getDashboardSnapshot(
 
 export function buildMockDashboardPayload(
   locationKey: LocationKey = defaultLocationKey,
+  _locale: DashboardLocale = 'en',
 ): DashboardPayload {
+  void _locale
+
   return {
     locationKey,
     locations,

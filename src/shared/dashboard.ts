@@ -1,4 +1,13 @@
-export type LocationKey = 'tapah' | 'ipoh' | 'taiping' | 'lumut'
+export type LocationKey =
+  | 'tapah'
+  | 'ipoh'
+  | 'taiping'
+  | 'lumut'
+  | 'gopeng'
+  | 'gerik'
+  | 'sungkai'
+  | 'teluk-intan'
+export type DashboardLocale = 'en' | 'bm'
 export type Severity = 'Monitor' | 'Watch' | 'Alert'
 export type AirBand = 'Good' | 'Moderate' | 'Poor'
 export type HikeVerdict = 'Go' | 'Caution' | 'Skip'
@@ -96,14 +105,23 @@ export type DashboardErrorPayload = {
 }
 
 export const defaultLocationKey: LocationKey = 'tapah'
+export const defaultDashboardLocale: DashboardLocale = 'en'
 
 export const locations: LocationOption[] = [
   { key: 'tapah', label: 'Tapah' },
   { key: 'ipoh', label: 'Ipoh' },
   { key: 'taiping', label: 'Taiping' },
   { key: 'lumut', label: 'Lumut' },
+  { key: 'gopeng', label: 'Gopeng' },
+  { key: 'gerik', label: 'Gerik' },
+  { key: 'sungkai', label: 'Sungkai' },
+  { key: 'teluk-intan', label: 'Teluk Intan' },
 ]
 
 export function isLocationKey(value: string): value is LocationKey {
   return locations.some((location) => location.key === value)
+}
+
+export function isDashboardLocale(value: string): value is DashboardLocale {
+  return value === 'en' || value === 'bm'
 }

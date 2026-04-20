@@ -1,6 +1,7 @@
 import { buildMockDashboardPayload } from '../src/mockData.ts'
 import {
   type AirBand,
+  type DashboardLocale,
   type DashboardPayload,
   type ForecastDay,
   type HikeTip,
@@ -22,20 +23,6 @@ const malaysiaDateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
-})
-
-const malaysiaTimeFormatter = new Intl.DateTimeFormat('en-MY', {
-  timeZone: MALAYSIA_TIMEZONE,
-  hour: 'numeric',
-  minute: '2-digit',
-})
-
-const malaysiaDateTimeFormatter = new Intl.DateTimeFormat('en-MY', {
-  timeZone: MALAYSIA_TIMEZONE,
-  day: 'numeric',
-  month: 'short',
-  hour: 'numeric',
-  minute: '2-digit',
 })
 
 type OpenWeatherForecastResponse = {
@@ -179,6 +166,14 @@ function toTitleCase(value: string) {
   return value.replace(/\b\w/g, (character) => character.toUpperCase())
 }
 
+function toSentenceCase(value: string) {
+  if (!value) {
+    return value
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 function getHoursUntil(target: Date, now: Date) {
   return (target.getTime() - now.getTime()) / (1000 * 60 * 60)
 }
@@ -220,12 +215,28 @@ function formatMalaysiaDate(date: Date) {
   return `${year}-${month}-${day}`
 }
 
-function formatMalaysiaTime(dateValue: string | number | Date) {
-  return malaysiaTimeFormatter.format(new Date(dateValue))
+function formatMalaysiaTime(
+  dateValue: string | number | Date,
+  locale: DashboardLocale,
+) {
+  return new Intl.DateTimeFormat(locale === 'bm' ? 'ms-MY' : 'en-MY', {
+    timeZone: MALAYSIA_TIMEZONE,
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(dateValue))
 }
 
-function formatMalaysiaDateTime(dateValue: string | number | Date) {
-  return malaysiaDateTimeFormatter.format(new Date(dateValue))
+function formatMalaysiaDateTime(
+  dateValue: string | number | Date,
+  locale: DashboardLocale,
+) {
+  return new Intl.DateTimeFormat(locale === 'bm' ? 'ms-MY' : 'en-MY', {
+    timeZone: MALAYSIA_TIMEZONE,
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(dateValue))
 }
 
 function getSeverityFromWarning(item: MalaysiaWarningItem): Severity {
@@ -259,7 +270,11 @@ function getSeverityFromWarning(item: MalaysiaWarningItem): Severity {
   return 'Monitor'
 }
 
-function getMalaysiaSummary(summary: string) {
+function getMalaysiaSummary(summary: string, locale: DashboardLocale) {
+  if (locale === 'bm') {
+    return summary
+  }
+
   return malaysiaForecastTranslations[summary] ?? summary
 }
 
@@ -304,42 +319,69 @@ function estimateHumidity(maxTemp: number, minTemp: number, rainChance: number) 
   return Math.max(60, Math.min(92, Math.round(estimated)))
 }
 
-function buildNextRainWindowFromMalaysiaForecast(todayForecast: MalaysiaForecastItem) {
+function buildNextRainWindowFromMalaysiaForecast(
+  todayForecast: MalaysiaForecastItem,
+  locale: DashboardLocale,
+) {
   const lowered = todayForecast.summary_forecast.toLowerCase()
   const when = todayForecast.summary_when.toLowerCase()
 
-  if (lowered.includes('no rain') || lowered.includes('hazy')) {
-    return 'Best dry window: Most of the day looks dry'
+  if (
+    lowered.includes('no rain') ||
+    lowered.includes('tiada hujan') ||
+    lowered.includes('hazy') ||
+    lowered.includes('berjerebu')
+  ) {
+    return locale === 'bm'
+      ? 'Waktu kering terbaik: Kebanyakan hari nampak kering'
+      : 'Best dry window: Most of the day looks dry'
   }
 
   if (when.includes('petang') && !when.includes('malam')) {
-    return 'Best dry window: Morning to noon'
+    return locale === 'bm'
+      ? 'Waktu kering terbaik: Pagi hingga tengah hari'
+      : 'Best dry window: Morning to noon'
   }
 
   if (when.includes('malam') && !when.includes('petang')) {
-    return 'Best dry window: Through the afternoon'
+    return locale === 'bm'
+      ? 'Waktu kering terbaik: Hingga waktu petang'
+      : 'Best dry window: Through the afternoon'
   }
 
   if (when.includes('pagi') && !when.includes('petang') && !when.includes('malam')) {
-    return 'Best dry window: Later in the day'
+    return locale === 'bm'
+      ? 'Waktu kering terbaik: Lewat sedikit dalam hari ini'
+      : 'Best dry window: Later in the day'
   }
 
   if (when.includes('pagi') && when.includes('petang')) {
-    return 'Best dry window: Night looks steadier than the day'
+    return locale === 'bm'
+      ? 'Waktu kering terbaik: Malam nampak lebih stabil daripada siang'
+      : 'Best dry window: Night looks steadier than the day'
   }
 
   if (when.includes('petang') && when.includes('malam')) {
-    return 'Best dry window: Early morning only'
+    return locale === 'bm'
+      ? 'Waktu kering terbaik: Awal pagi sahaja'
+      : 'Best dry window: Early morning only'
   }
 
   if (when.includes('sepanjang hari')) {
-    return 'Limited dry window: Rain can linger through the day'
+    return locale === 'bm'
+      ? 'Waktu kering terhad: Hujan boleh berlarutan sepanjang hari'
+      : 'Limited dry window: Rain can linger through the day'
   }
 
-  return 'Best dry window: Keep plans early if possible'
+  return locale === 'bm'
+    ? 'Waktu kering terbaik: Rancang aktiviti lebih awal jika boleh'
+    : 'Best dry window: Keep plans early if possible'
 }
 
-function buildNextRainWindowFromOpenWeather(data: OpenWeatherForecastResponse) {
+function buildNextRainWindowFromOpenWeather(
+  data: OpenWeatherForecastResponse,
+  locale: DashboardLocale,
+) {
   const nextWetSlot = data.list.find((entry) => {
     const rainChance = Math.round((entry.pop ?? 0) * 100)
     const weatherMain = entry.weather[0]?.main.toLowerCase() ?? ''
@@ -348,10 +390,14 @@ function buildNextRainWindowFromOpenWeather(data: OpenWeatherForecastResponse) {
   })
 
   if (!nextWetSlot) {
-    return 'Best dry window: Most of the day looks dry'
+    return locale === 'bm'
+      ? 'Waktu kering terbaik: Kebanyakan hari nampak kering'
+      : 'Best dry window: Most of the day looks dry'
   }
 
-  return `Best dry window: Until ${formatMalaysiaTime(nextWetSlot.dt * 1000)}`
+  return locale === 'bm'
+    ? `Waktu kering terbaik: Sehingga ${formatMalaysiaTime(nextWetSlot.dt * 1000, locale)}`
+    : `Best dry window: Until ${formatMalaysiaTime(nextWetSlot.dt * 1000, locale)}`
 }
 
 function estimateCurrentTempFromForecastDay(day: ForecastDay | undefined) {
@@ -384,8 +430,13 @@ function getCurrentTempFromOpenWeatherForecast(
 
 function getCurrentSummaryFromOpenWeatherCurrent(
   data: OpenWeatherCurrentResponse,
+  locale: DashboardLocale,
 ) {
-  return toTitleCase(data.weather[0]?.description ?? 'Current conditions steady')
+  const description =
+    data.weather[0]?.description ??
+    (locale === 'bm' ? 'keadaan semasa stabil' : 'current conditions steady')
+
+  return locale === 'bm' ? toSentenceCase(description) : toTitleCase(description)
 }
 
 function mapOpenWeatherAqiToBand(aqiIndex: number): AirBand {
@@ -413,6 +464,7 @@ function mapOpenWeatherAqiToScore(
 
 function normalizeOpenWeatherForecast(
   data: OpenWeatherForecastResponse,
+  locale: DashboardLocale,
 ): ForecastDay[] {
   const groupedEntries = new Map<string, OpenWeatherForecastResponse['list']>()
 
@@ -455,7 +507,10 @@ function normalizeOpenWeatherForecast(
         low,
         rainChance,
         humidity,
-        summary: toTitleCase(summaryEntry.weather[0]?.description ?? 'Cloudy'),
+        summary:
+          locale === 'bm'
+            ? toSentenceCase(summaryEntry.weather[0]?.description ?? 'Berawan')
+            : toTitleCase(summaryEntry.weather[0]?.description ?? 'Cloudy'),
       }
     })
 }
@@ -463,12 +518,13 @@ function normalizeOpenWeatherForecast(
 function normalizeMalaysiaForecast(
   data: MalaysiaForecastItem[],
   fallback: ForecastDay[],
+  locale: DashboardLocale,
 ): ForecastDay[] {
   return [...data]
     .sort((left, right) => left.date.localeCompare(right.date))
     .slice(0, 5)
     .map((entry, index) => {
-      const translatedSummary = getMalaysiaSummary(entry.summary_forecast)
+      const translatedSummary = getMalaysiaSummary(entry.summary_forecast, locale)
       const rainChance = estimateRainChance(entry.summary_forecast)
 
       return {
@@ -514,11 +570,25 @@ function isWarningRelevant(
   )
 }
 
-function formatWarningWindow(validFrom: string, validTo: string) {
-  return `${formatMalaysiaDateTime(validFrom)} - ${formatMalaysiaDateTime(validTo)}`
+function formatWarningWindow(
+  validFrom: string,
+  validTo: string,
+  locale: DashboardLocale,
+) {
+  return `${formatMalaysiaDateTime(validFrom, locale)} - ${formatMalaysiaDateTime(validTo, locale)}`
 }
 
-function getWarningTitle(warning: MalaysiaWarningItem) {
+function getWarningTitle(warning: MalaysiaWarningItem, locale: DashboardLocale) {
+  if (locale === 'bm') {
+    return (
+      warning.heading_bm ??
+      warning.warning_issue.title_bm ??
+      warning.heading_en ??
+      warning.warning_issue.title_en ??
+      'Amaran cuaca'
+    )
+  }
+
   return (
     warning.heading_en ??
     warning.warning_issue.title_en ??
@@ -531,8 +601,9 @@ function getWarningTitle(warning: MalaysiaWarningItem) {
 function buildWarningSignal(
   warning: MalaysiaWarningItem,
   now: Date,
+  locale: DashboardLocale,
 ): WarningSignal {
-  const title = getWarningTitle(warning)
+  const title = getWarningTitle(warning, locale)
   const startsAt = new Date(warning.valid_from)
   const endsAt = new Date(warning.valid_to)
   const searchable = [
@@ -575,8 +646,9 @@ function buildWarningSignal(
 function buildWarningDecisionSignals(
   warnings: MalaysiaWarningItem[],
   now: Date,
+  locale: DashboardLocale,
 ) {
-  const warningSignals = warnings.map((warning) => buildWarningSignal(warning, now))
+  const warningSignals = warnings.map((warning) => buildWarningSignal(warning, now, locale))
   const activeWarning =
     warningSignals
       .filter((warning) => warning.isActive)
@@ -613,19 +685,26 @@ function buildWarningDecisionSignals(
 function normalizeMalaysiaWarnings(
   warnings: MalaysiaWarningItem[],
   location: LiveLocationConfig,
+  locale: DashboardLocale,
 ): WarningItem[] {
   return getRelevantMalaysiaWarnings(warnings, location)
     .slice(0, 3)
     .map((warning) => ({
-      title: getWarningTitle(warning),
+      title: getWarningTitle(warning, locale),
       severity: getSeverityFromWarning(warning),
-      window: formatWarningWindow(warning.valid_from, warning.valid_to),
+      window: formatWarningWindow(warning.valid_from, warning.valid_to, locale),
       message:
-        warning.text_en ??
-        warning.text_bm ??
-        warning.instruction_en ??
-        warning.instruction_bm ??
-        'Follow the latest advisory from MET Malaysia.',
+        locale === 'bm'
+          ? warning.text_bm ??
+            warning.instruction_bm ??
+            warning.text_en ??
+            warning.instruction_en ??
+            'Ikuti nasihat terkini daripada MET Malaysia.'
+          : warning.text_en ??
+            warning.instruction_en ??
+            warning.text_bm ??
+            warning.instruction_bm ??
+            'Follow the latest advisory from MET Malaysia.',
     }))
 }
 
@@ -639,8 +718,10 @@ function hasWetWeatherSignal(entry: OpenWeatherForecastResponse['list'][number])
     rainChance >= 45 ||
     rainVolumeMm >= 0.2 ||
     description.includes('rain') ||
+    description.includes('hujan') ||
     description.includes('drizzle') ||
     description.includes('thunder') ||
+    description.includes('ribut') ||
     main.includes('rain') ||
     main.includes('thunder')
   )
@@ -649,14 +730,20 @@ function hasWetWeatherSignal(entry: OpenWeatherForecastResponse['list'][number])
 function buildWetSlotSignal(
   entry: OpenWeatherForecastResponse['list'][number],
   now: Date,
+  locale: DashboardLocale,
 ): WetSlotSignal {
   const startsAt = new Date(entry.dt * 1000)
-  const summary = toTitleCase(entry.weather[0]?.description ?? 'Cloudy')
-  const hasThunder = summary.toLowerCase().includes('thunder')
+  const summary =
+    locale === 'bm'
+      ? toSentenceCase(entry.weather[0]?.description ?? 'Berawan')
+      : toTitleCase(entry.weather[0]?.description ?? 'Cloudy')
+  const loweredSummary = summary.toLowerCase()
+  const hasThunder =
+    loweredSummary.includes('thunder') || loweredSummary.includes('ribut')
 
   return {
     startsAt,
-    startsLabel: formatMalaysiaTime(startsAt),
+    startsLabel: formatMalaysiaTime(startsAt, locale),
     hoursAway: getHoursUntil(startsAt, now),
     rainChance: Math.round((entry.pop ?? 0) * 100),
     rainVolumeMm: Number((entry.rain?.['3h'] ?? 0).toFixed(1)),
@@ -668,6 +755,7 @@ function buildWetSlotSignal(
 function buildWetSlotDecisionSignals(
   data: OpenWeatherForecastResponse,
   now: Date,
+  locale: DashboardLocale,
 ) {
   const todayKey = formatMalaysiaDate(now)
   const upcomingTodayEntries = data.list.filter((entry) => {
@@ -681,7 +769,7 @@ function buildWetSlotDecisionSignals(
 
   const wetSlots = upcomingTodayEntries
     .filter((entry) => hasWetWeatherSignal(entry))
-    .map((entry) => buildWetSlotSignal(entry, now))
+    .map((entry) => buildWetSlotSignal(entry, now, locale))
 
   const heaviestWetSlot =
     wetSlots.reduce<WetSlotSignal | null>((current, slot) => {
@@ -706,46 +794,61 @@ function buildWetSlotDecisionSignals(
   }
 }
 
-function formatWetSlotCue(slot: WetSlotSignal | null) {
+function formatWetSlotCue(slot: WetSlotSignal | null, locale: DashboardLocale) {
   if (!slot) {
-    return 'No meaningful rain band is showing for the rest of today.'
+    return locale === 'bm'
+      ? 'Tiada jalur hujan yang ketara untuk baki hari ini.'
+      : 'No meaningful rain band is showing for the rest of today.'
   }
 
   if (slot.hoursAway <= 1) {
-    return `Rain risk is arriving now and looks strongest around ${slot.startsLabel}.`
+    return locale === 'bm'
+      ? `Risiko hujan sedang tiba sekarang dan kelihatan paling kuat sekitar ${slot.startsLabel}.`
+      : `Rain risk is arriving now and looks strongest around ${slot.startsLabel}.`
   }
 
   if (slot.hoursAway <= 3) {
-    return `The next rain band is due around ${slot.startsLabel}.`
+    return locale === 'bm'
+      ? `Jalur hujan seterusnya dijangka sekitar ${slot.startsLabel}.`
+      : `The next rain band is due around ${slot.startsLabel}.`
   }
 
-  return `The next meaningful rain risk is around ${slot.startsLabel}.`
+  return locale === 'bm'
+    ? `Risiko hujan seterusnya yang ketara adalah sekitar ${slot.startsLabel}.`
+    : `The next meaningful rain risk is around ${slot.startsLabel}.`
 }
 
-function buildRainCueLabel(slot: WetSlotSignal | null) {
+function buildRainCueLabel(slot: WetSlotSignal | null, locale: DashboardLocale) {
   if (!slot) {
     return {
-      label: 'No major rain band today',
+      label:
+        locale === 'bm' ? 'Tiada jalur hujan besar hari ini' : 'No major rain band today',
       tone: 'positive' as const,
     }
   }
 
   if (slot.hoursAway <= 1) {
     return {
-      label: `Rain arriving now`,
+      label: locale === 'bm' ? 'Hujan tiba sekarang' : 'Rain arriving now',
       tone: 'danger' as const,
     }
   }
 
   if (slot.hoursAway <= 3) {
     return {
-      label: `Rain around ${slot.startsLabel}`,
+      label:
+        locale === 'bm'
+          ? `Hujan sekitar ${slot.startsLabel}`
+          : `Rain around ${slot.startsLabel}`,
       tone: slot.hasThunder || slot.rainChance >= 80 ? ('danger' as const) : ('caution' as const),
     }
   }
 
   return {
-    label: `Rain later ${slot.startsLabel}`,
+    label:
+      locale === 'bm'
+        ? `Hujan lewat ${slot.startsLabel}`
+        : `Rain later ${slot.startsLabel}`,
     tone: 'neutral' as const,
   }
 }
@@ -753,10 +856,14 @@ function buildRainCueLabel(slot: WetSlotSignal | null) {
 function buildWarningCueLabel(
   activeWarning: WarningSignal | null,
   nextWarning: WarningSignal | null,
+  locale: DashboardLocale,
 ) {
   if (activeWarning) {
     return {
-      label: `${activeWarning.title} active now`,
+      label:
+        locale === 'bm'
+          ? `${activeWarning.title} aktif sekarang`
+          : `${activeWarning.title} active now`,
       tone:
         severityWeight[activeWarning.severity] >= severityWeight.Watch ||
         activeWarning.mentionsThunder ||
@@ -769,57 +876,77 @@ function buildWarningCueLabel(
 
   if (nextWarning && nextWarning.startsInHours <= 6) {
     return {
-      label: `${nextWarning.title} at ${formatMalaysiaTime(nextWarning.startsAt)}`,
+      label:
+        locale === 'bm'
+          ? `${nextWarning.title} pada ${formatMalaysiaTime(nextWarning.startsAt, locale)}`
+          : `${nextWarning.title} at ${formatMalaysiaTime(nextWarning.startsAt, locale)}`,
       tone: 'caution' as const,
     }
   }
 
   return {
-    label: 'No active warning',
+    label: locale === 'bm' ? 'Tiada amaran aktif' : 'No active warning',
     tone: 'positive' as const,
   }
 }
 
-function buildAirCueLabel(snapshot: LocationSnapshot) {
+function buildAirCueLabel(snapshot: LocationSnapshot, locale: DashboardLocale) {
   if (snapshot.airBand === 'Poor' || snapshot.aqi >= 120) {
     return {
-      label: `AQI ${snapshot.aqi} poor`,
+      label: locale === 'bm' ? `AQI ${snapshot.aqi} kurang baik` : `AQI ${snapshot.aqi} poor`,
       tone: 'danger' as const,
     }
   }
 
   if (snapshot.airBand === 'Moderate' || snapshot.aqi >= 60) {
     return {
-      label: `AQI ${snapshot.aqi} moderate`,
+      label: locale === 'bm' ? `AQI ${snapshot.aqi} sederhana` : `AQI ${snapshot.aqi} moderate`,
       tone: 'caution' as const,
     }
   }
 
   return {
-    label: `AQI ${snapshot.aqi} good`,
+    label: locale === 'bm' ? `AQI ${snapshot.aqi} baik` : `AQI ${snapshot.aqi} good`,
     tone: 'positive' as const,
   }
 }
 
-function buildOverview(snapshot: LocationSnapshot) {
+function buildOverview(snapshot: LocationSnapshot, locale: DashboardLocale) {
   const firstForecast = snapshot.forecast[0]
   const warningLead = snapshot.warnings[0]
-  const currentText = `Current conditions look ${snapshot.currentSummary.toLowerCase()}.`
+  const currentText =
+    locale === 'bm'
+      ? `Keadaan semasa kelihatan ${snapshot.currentSummary.toLowerCase()}.`
+      : `Current conditions look ${snapshot.currentSummary.toLowerCase()}.`
 
   const forecastText = firstForecast
-    ? `The broader trend today is ${firstForecast.summary.toLowerCase()}.`
-    : 'Weather conditions are steady for now.'
+    ? locale === 'bm'
+      ? `Corak umum hari ini ialah ${firstForecast.summary.toLowerCase()}.`
+      : `The broader trend today is ${firstForecast.summary.toLowerCase()}.`
+    : locale === 'bm'
+      ? 'Keadaan cuaca kelihatan stabil buat masa ini.'
+      : 'Weather conditions are steady for now.'
 
   const airText =
-    snapshot.airBand === 'Poor'
-      ? 'Air quality is uncomfortable for longer outdoor activity.'
-      : snapshot.airBand === 'Moderate'
-        ? 'Air quality is acceptable for most people, but not ideal for a hard outdoor session.'
-        : 'Air quality looks comfortable for most outdoor plans.'
+    locale === 'bm'
+      ? snapshot.airBand === 'Poor'
+        ? 'Kualiti udara kurang sesuai untuk aktiviti luar yang lebih lama.'
+        : snapshot.airBand === 'Moderate'
+          ? 'Kualiti udara masih boleh diterima bagi kebanyakan orang, tetapi kurang sesuai untuk aktiviti luar yang berat.'
+          : 'Kualiti udara kelihatan selesa untuk kebanyakan rancangan luar.'
+      : snapshot.airBand === 'Poor'
+        ? 'Air quality is uncomfortable for longer outdoor activity.'
+        : snapshot.airBand === 'Moderate'
+          ? 'Air quality is acceptable for most people, but not ideal for a hard outdoor session.'
+          : 'Air quality looks comfortable for most outdoor plans.'
 
   const warningText = warningLead
-    ? `Keep an eye on ${warningLead.title.toLowerCase()}.`
-    : 'No location-specific warnings are active at the moment.'
+    ? locale === 'bm'
+      ? `Awasi ${warningLead.title.toLowerCase()}.`
+      : `Keep an eye on ${warningLead.title.toLowerCase()}.`
+    : locale === 'bm'
+      ? 'Tiada amaran khusus lokasi yang aktif buat masa ini.'
+      : 'No location-specific warnings are active at the moment.'
 
   return `${currentText} ${forecastText} ${airText} ${warningText}`
 }
@@ -827,6 +954,7 @@ function buildOverview(snapshot: LocationSnapshot) {
 function buildHikeTip(
   snapshot: LocationSnapshot,
   target: string,
+  locale: DashboardLocale,
   signals?: HikeDecisionSignals,
 ): HikeTip {
   const today = snapshot.forecast[0]
@@ -856,7 +984,8 @@ function buildHikeTip(
     snapshot.airBand === 'Moderate' || (snapshot.aqi >= 60 && snapshot.aqi < 120)
   const thunderSummary = today
     ? today.summary.toLowerCase().includes('thunder') ||
-      today.summary.toLowerCase().includes('storm')
+      today.summary.toLowerCase().includes('storm') ||
+      today.summary.toLowerCase().includes('ribut')
     : false
   const nearTermHeavyRain =
     nextWetSlot !== null &&
@@ -881,17 +1010,23 @@ function buildHikeTip(
     (heaviestWetSlot !== null &&
       heaviestWetSlot.hoursAway <= 8 &&
       (heaviestWetSlot.rainChance >= 70 || heaviestWetSlot.rainVolumeMm >= 4))
-  const warningCueLabel = buildWarningCueLabel(activeWarning, nextWarning)
-  const rainCueLabel = buildRainCueLabel(nextWetSlot)
-  const airCueLabel = buildAirCueLabel(snapshot)
+  const warningCueLabel = buildWarningCueLabel(activeWarning, nextWarning, locale)
+  const rainCueLabel = buildRainCueLabel(nextWetSlot, locale)
+  const airCueLabel = buildAirCueLabel(snapshot, locale)
 
   if (poorAir) {
     return {
       target,
       verdict: 'Skip',
       confidence: 88,
-      title: 'Air quality is too rough for a proper hike.',
-      reason: `AQI is ${snapshot.aqi}, which is a poor reading for a strenuous climb or long exposed walk. Wait for cleaner air before treating this as a hiking day.`,
+      title:
+        locale === 'bm'
+          ? 'Kualiti udara terlalu kasar untuk pendakian yang sesuai.'
+          : 'Air quality is too rough for a proper hike.',
+      reason:
+        locale === 'bm'
+          ? `AQI berada pada ${snapshot.aqi}, iaitu bacaan yang kurang baik untuk pendakian berat atau perjalanan jauh di kawasan terbuka. Tunggu udara yang lebih bersih sebelum anggap hari ini sesuai untuk mendaki.`
+          : `AQI is ${snapshot.aqi}, which is a poor reading for a strenuous climb or long exposed walk. Wait for cleaner air before treating this as a hiking day.`,
       cues: [airCueLabel, warningCueLabel, rainCueLabel],
     }
   }
@@ -902,15 +1037,21 @@ function buildHikeTip(
     (activeWarning !== null &&
       severityWeight[activeWarning.severity] >= severityWeight.Watch)
   ) {
-    const warningName = activeWarning?.title ?? 'weather warning'
-    const rainCue = formatWetSlotCue(nextWetSlot)
+    const warningName = activeWarning?.title ?? (locale === 'bm' ? 'amaran cuaca' : 'weather warning')
+    const rainCue = formatWetSlotCue(nextWetSlot, locale)
 
     return {
       target,
       verdict: 'Skip',
       confidence: 90,
-      title: 'Active storm risk makes this a poor hiking window.',
-      reason: `${warningName} is already active for this area. ${rainCue} For an exposed route, that is too tight a margin to recommend a hike.`,
+      title:
+        locale === 'bm'
+          ? 'Risiko ribut aktif menjadikan waktu ini tidak sesuai untuk mendaki.'
+          : 'Active storm risk makes this a poor hiking window.',
+      reason:
+        locale === 'bm'
+          ? `${warningName} sudah aktif untuk kawasan ini. ${rainCue} Untuk laluan yang terdedah, margin masa ini terlalu sempit untuk mengesyorkan pendakian.`
+          : `${warningName} is already active for this area. ${rainCue} For an exposed route, that is too tight a margin to recommend a hike.`,
       cues: [warningCueLabel, rainCueLabel, airCueLabel],
     }
   }
@@ -926,23 +1067,38 @@ function buildHikeTip(
   ) {
     const warningCue =
       activeWarning !== null
-        ? `${activeWarning.title} is active now`
+        ? locale === 'bm'
+          ? `${activeWarning.title} sedang aktif sekarang`
+          : `${activeWarning.title} is active now`
         : nextWarning !== null
-          ? `${nextWarning.title} starts around ${formatMalaysiaTime(nextWarning.startsAt)}`
+          ? locale === 'bm'
+            ? `${nextWarning.title} bermula sekitar ${formatMalaysiaTime(nextWarning.startsAt, locale)}`
+            : `${nextWarning.title} starts around ${formatMalaysiaTime(nextWarning.startsAt, locale)}`
           : null
 
     const rainCue = nextWetSlot
-      ? `The next rain band is due around ${nextWetSlot.startsLabel}`
-      : 'Rain risk still builds later in the day'
+      ? locale === 'bm'
+        ? `Jalur hujan seterusnya dijangka sekitar ${nextWetSlot.startsLabel}`
+        : `The next rain band is due around ${nextWetSlot.startsLabel}`
+      : locale === 'bm'
+        ? 'Risiko hujan masih meningkat lewat hari ini'
+        : 'Rain risk still builds later in the day'
 
     return {
       target,
       verdict: 'Caution',
       confidence: activeWarning !== null || warningStartsSoon || nearTermHeavyRain ? 81 : 76,
-      title: 'There is a usable window, but it closes later today.',
+      title:
+        locale === 'bm'
+          ? 'Masih ada ruang masa yang boleh digunakan, tetapi ia akan tertutup kemudian hari ini.'
+          : 'There is a usable window, but it closes later today.',
       reason: warningCue
-        ? `${warningCue}, and ${rainCue.toLowerCase()}. Keep the route short, start early, and stay ready to turn back once the weather starts shifting.`
-        : `${rainCue}. Keep the route short, start early, and stay ready to turn back once the weather starts shifting.`,
+        ? locale === 'bm'
+          ? `${warningCue}, dan ${rainCue.toLowerCase()}. Pastikan laluan lebih pendek, mulakan lebih awal, dan sentiasa bersedia untuk berpatah balik apabila cuaca mula berubah.`
+          : `${warningCue}, and ${rainCue.toLowerCase()}. Keep the route short, start early, and stay ready to turn back once the weather starts shifting.`
+        : locale === 'bm'
+          ? `${rainCue}. Pastikan laluan lebih pendek, mulakan lebih awal, dan sentiasa bersedia untuk berpatah balik apabila cuaca mula berubah.`
+          : `${rainCue}. Keep the route short, start early, and stay ready to turn back once the weather starts shifting.`,
       cues: [warningCueLabel, rainCueLabel, airCueLabel],
     }
   }
@@ -951,8 +1107,14 @@ function buildHikeTip(
     target,
     verdict: 'Go',
     confidence: 84,
-    title: 'The next several hours look workable for a hike.',
-    reason: `No location-specific warning is active, AQI is ${snapshot.aqi}, and ${formatWetSlotCue(nextWetSlot).toLowerCase()} Recheck once before you head out and keep normal rain gear with you.`,
+    title:
+      locale === 'bm'
+        ? 'Beberapa jam seterusnya kelihatan sesuai untuk mendaki.'
+        : 'The next several hours look workable for a hike.',
+    reason:
+      locale === 'bm'
+        ? `Tiada amaran khusus lokasi yang aktif, AQI ialah ${snapshot.aqi}, dan ${formatWetSlotCue(nextWetSlot, locale).toLowerCase()} Semak sekali lagi sebelum anda keluar dan bawa kelengkapan hujan biasa bersama.`
+        : `No location-specific warning is active, AQI is ${snapshot.aqi}, and ${formatWetSlotCue(nextWetSlot, locale).toLowerCase()} Recheck once before you head out and keep normal rain gear with you.`,
     cues: [warningCueLabel, airCueLabel, rainCueLabel],
   }
 }
@@ -983,12 +1145,14 @@ async function fetchMalaysiaWarnings() {
 async function fetchOpenWeatherForecast(
   location: LiveLocationConfig,
   apiKey: string,
+  locale: DashboardLocale,
 ) {
   const query = new URLSearchParams({
     lat: String(location.lat),
     lon: String(location.lon),
     appid: apiKey,
     units: 'metric',
+    lang: locale === 'bm' ? 'ms' : 'en',
   })
 
   return fetchJson<OpenWeatherForecastResponse>(
@@ -999,12 +1163,14 @@ async function fetchOpenWeatherForecast(
 async function fetchOpenWeatherCurrent(
   location: LiveLocationConfig,
   apiKey: string,
+  locale: DashboardLocale,
 ) {
   const query = new URLSearchParams({
     lat: String(location.lat),
     lon: String(location.lon),
     appid: apiKey,
     units: 'metric',
+    lang: locale === 'bm' ? 'ms' : 'en',
   })
 
   return fetchJson<OpenWeatherCurrentResponse>(
@@ -1046,8 +1212,9 @@ function getSourceFromProviders(
 
 export async function buildDashboardPayload(
   locationKey: LocationKey,
+  locale: DashboardLocale = 'en',
 ): Promise<DashboardPayload> {
-  const fallbackPayload = buildMockDashboardPayload(locationKey)
+  const fallbackPayload = buildMockDashboardPayload(locationKey, locale)
   const location = liveLocationConfig[locationKey]
   const snapshot = cloneSnapshot(fallbackPayload.snapshot)
   const providers: DashboardPayload['meta']['providers'] = {
@@ -1079,10 +1246,10 @@ export async function buildDashboardPayload(
       fetchMalaysiaForecast(location),
       fetchMalaysiaWarnings(),
       openWeatherApiKey
-        ? fetchOpenWeatherCurrent(location, openWeatherApiKey)
+        ? fetchOpenWeatherCurrent(location, openWeatherApiKey, locale)
         : Promise.resolve(null),
       openWeatherApiKey
-        ? fetchOpenWeatherForecast(location, openWeatherApiKey)
+        ? fetchOpenWeatherForecast(location, openWeatherApiKey, locale)
         : Promise.resolve(null),
       openWeatherApiKey
         ? fetchOpenWeatherAir(location, openWeatherApiKey)
@@ -1094,7 +1261,7 @@ export async function buildDashboardPayload(
     malaysiaForecastResult.value.length > 0
   ) {
     const malaysiaForecast = malaysiaForecastResult.value
-    snapshot.forecast = normalizeMalaysiaForecast(malaysiaForecast, snapshot.forecast)
+    snapshot.forecast = normalizeMalaysiaForecast(malaysiaForecast, snapshot.forecast, locale)
     snapshot.currentTemp = estimateCurrentTempFromForecastDay(snapshot.forecast[0])
     snapshot.currentSummary = snapshot.forecast[0]?.summary ?? snapshot.currentSummary
     providers.malaysiaForecast = 'live'
@@ -1102,6 +1269,7 @@ export async function buildDashboardPayload(
     if (malaysiaForecast[0]) {
       snapshot.nextRainWindow = buildNextRainWindowFromMalaysiaForecast(
         malaysiaForecast[0],
+        locale,
       )
     }
   }
@@ -1112,8 +1280,8 @@ export async function buildDashboardPayload(
       location,
     )
 
-    snapshot.warnings = normalizeMalaysiaWarnings(malaysiaWarningsResult.value, location)
-    warningSignals = buildWarningDecisionSignals(relevantWarnings, now)
+    snapshot.warnings = normalizeMalaysiaWarnings(malaysiaWarningsResult.value, location, locale)
+    warningSignals = buildWarningDecisionSignals(relevantWarnings, now, locale)
     providers.malaysiaWarnings = 'live'
   }
 
@@ -1124,6 +1292,7 @@ export async function buildDashboardPayload(
     snapshot.currentTemp = Math.round(openWeatherCurrentResult.value.main.temp)
     snapshot.currentSummary = getCurrentSummaryFromOpenWeatherCurrent(
       openWeatherCurrentResult.value,
+      locale,
     )
     providers.openWeatherCurrent = 'live'
   }
@@ -1132,7 +1301,7 @@ export async function buildDashboardPayload(
     openWeatherForecastResult.status === 'fulfilled' &&
     openWeatherForecastResult.value
   ) {
-    snapshot.forecast = normalizeOpenWeatherForecast(openWeatherForecastResult.value)
+    snapshot.forecast = normalizeOpenWeatherForecast(openWeatherForecastResult.value, locale)
     if (providers.openWeatherCurrent !== 'live') {
       snapshot.currentTemp =
         getCurrentTempFromOpenWeatherForecast(openWeatherForecastResult.value, now) ??
@@ -1141,8 +1310,9 @@ export async function buildDashboardPayload(
     }
     snapshot.nextRainWindow = buildNextRainWindowFromOpenWeather(
       openWeatherForecastResult.value,
+      locale,
     )
-    wetSignals = buildWetSlotDecisionSignals(openWeatherForecastResult.value, now)
+    wetSignals = buildWetSlotDecisionSignals(openWeatherForecastResult.value, now, locale)
     providers.openWeatherForecast = 'live'
   }
 
@@ -1173,8 +1343,9 @@ export async function buildDashboardPayload(
   if (source !== 'mock') {
     snapshot.updatedAt = servedAt
     snapshot.cacheAgeMinutes = 0
-    snapshot.overview = buildOverview(snapshot)
-    snapshot.hikeTip = buildHikeTip(snapshot, snapshot.hikeTip.target, {
+    snapshot.hikeTip.target = location.hikeTarget
+    snapshot.overview = buildOverview(snapshot, locale)
+    snapshot.hikeTip = buildHikeTip(snapshot, snapshot.hikeTip.target, locale, {
       now,
       nextWetSlot: wetSignals.nextWetSlot,
       heaviestWetSlot: wetSignals.heaviestWetSlot,

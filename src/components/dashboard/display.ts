@@ -28,15 +28,19 @@ export function statusCopy(airBand: AirBand, locale: AppLocale) {
 export function weatherAccent(summary: string, locale: AppLocale) {
   const lowered = summary.toLowerCase()
 
-  if (lowered.includes('thunder') || lowered.includes('storm')) {
+  if (
+    lowered.includes('thunder') ||
+    lowered.includes('storm') ||
+    lowered.includes('ribut')
+  ) {
     return locale === 'bm' ? 'Pembentukan ribut nanti' : 'Storm build-up later'
   }
 
-  if (lowered.includes('rain')) {
+  if (lowered.includes('rain') || lowered.includes('hujan')) {
     return locale === 'bm' ? 'Hujan tiba kemudian' : 'Rain arrives later'
   }
 
-  if (lowered.includes('cloud')) {
+  if (lowered.includes('cloud') || lowered.includes('awan') || lowered.includes('berawan')) {
     return locale === 'bm' ? 'Litupan awan cerah' : 'Bright cloud cover'
   }
 

@@ -29,12 +29,22 @@ export function ForecastSidebar({
 
       <div className="mt-6 space-y-3">
         {forecastDays.map((day, index) => (
-          <article key={`${day.date}-${index}`} className="forecast-sidebar-item p-4">
+          <article
+            key={`${day.date}-${index}`}
+            className={`forecast-sidebar-item p-4 ${index === 0 ? 'border-sky-300/60 bg-sky-100/35' : ''}`}
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700/85">
-                  {dayjs(day.date).format('ddd')}
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700/85">
+                    {dayjs(day.date).format('ddd')}
+                  </p>
+                  {index === 0 ? (
+                    <span className="glass-chip px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-700">
+                      Today
+                    </span>
+                  ) : null}
+                </div>
                 <p className="mt-1 text-sm text-slate-500">{dayjs(day.date).format('D MMM')}</p>
               </div>
               <div className="text-right">

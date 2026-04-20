@@ -97,7 +97,10 @@ function App() {
         </main>
 
         <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.18fr)_0.82fr]">
-          <ForecastTrendChart forecastDays={forecastDays} />
+          <ForecastTrendChart
+            selectedLocationLabel={selectedLocationLabel}
+            forecastDays={forecastDays}
+          />
           <WarningFeed
             warnings={payload.snapshot.warnings}
             selectedLocationLabel={selectedLocationLabel}

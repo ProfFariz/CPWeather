@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import 'dayjs/locale/ms'
 import {
   type AirBand,
   type DashboardPayload,
@@ -8,42 +9,38 @@ import {
 import {
   type ClientCacheStatus,
 } from '../../hooks/useDashboard.ts'
+import {
+  type AppLocale,
+} from '../../i18n/dashboard.ts'
 
-export function statusCopy(airBand: AirBand) {
+export function statusCopy(airBand: AirBand, locale: AppLocale) {
+  if (locale === 'bm') {
+    if (airBand === 'Good') return 'Udara selesa untuk kebanyakan aktiviti luar.'
+    if (airBand === 'Moderate') return 'Masih boleh diurus, tetapi hadkan pendedahan yang lama.'
+    return 'Kualiti udara tidak sesuai untuk aktiviti luar yang berat.'
+  }
+
   if (airBand === 'Good') return 'Air feels comfortable for most outdoor plans.'
   if (airBand === 'Moderate') return 'Still manageable, but keep longer exposure lighter.'
   return 'Air quality is not ideal for strenuous outdoor activity.'
 }
 
-export function sourceLabel(source: DashboardPayload['meta']['source'] | undefined) {
-  if (source === 'live') return 'Live API'
-  if (source === 'hybrid') return 'Hybrid API'
-  return 'Mock API'
-}
-
-export function weatherAccent(summary: string) {
+export function weatherAccent(summary: string, locale: AppLocale) {
   const lowered = summary.toLowerCase()
 
   if (lowered.includes('thunder') || lowered.includes('storm')) {
-    return 'Storm build-up later'
+    return locale === 'bm' ? 'Pembentukan ribut nanti' : 'Storm build-up later'
   }
 
   if (lowered.includes('rain')) {
-    return 'Rain arrives later'
+    return locale === 'bm' ? 'Hujan tiba kemudian' : 'Rain arrives later'
   }
 
   if (lowered.includes('cloud')) {
-    return 'Bright cloud cover'
+    return locale === 'bm' ? 'Litupan awan cerah' : 'Bright cloud cover'
   }
 
-  return 'Soft tropical conditions'
-}
-
-export function cacheStatusLabel(status: ClientCacheStatus) {
-  if (status === 'fresh') return 'Local cache'
-  if (status === 'network') return 'Fresh fetch'
-  if (status === 'stale') return 'Stale fallback'
-  return 'No cache'
+  return locale === 'bm' ? 'Cuaca tropika tenang' : 'Soft tropical conditions'
 }
 
 export function cacheStatusClasses(status: ClientCacheStatus) {
@@ -104,6 +101,6 @@ export function resolveCurrentTemp(payload: DashboardPayload) {
   return Math.round((today.high + today.low) / 2)
 }
 
-export function formatForecastLabel(date: string) {
-  return dayjs(date).format('ddd')
+export function formatForecastLabel(date: string, locale: AppLocale) {
+  return dayjs(date).locale(locale === 'bm' ? 'ms' : 'en').format('ddd')
 }

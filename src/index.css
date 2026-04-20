@@ -133,6 +133,54 @@ a {
   @apply bg-white/55;
 }
 
+.glass-icon-button {
+  @apply inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/45 bg-white/45 text-sky-600 backdrop-blur-xl transition;
+  box-shadow:
+    0 14px 28px rgba(77, 126, 185, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.glass-icon-button:hover {
+  @apply bg-white/55 text-sky-700;
+}
+
+.brand-mark {
+  @apply inline-flex h-16 w-16 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-sky-500 to-blue-600 text-white;
+  box-shadow:
+    0 22px 46px rgba(59, 130, 246, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.header-select-shell {
+  @apply flex items-center gap-3 rounded-2xl border border-white/45 bg-white/45 px-4 py-3 text-slate-700 backdrop-blur-xl;
+  box-shadow:
+    0 14px 28px rgba(77, 126, 185, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.header-select {
+  @apply min-w-0 flex-1 appearance-none bg-transparent pr-2 text-base font-semibold text-slate-700 outline-none;
+}
+
+.header-segment {
+  @apply rounded-2xl px-4 py-2 text-sm font-semibold tracking-[0.12em] transition;
+}
+
+.header-segment-active {
+  @apply bg-white text-slate-900;
+  box-shadow:
+    0 10px 20px rgba(77, 126, 185, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.header-segment-idle {
+  @apply text-slate-500;
+}
+
+.header-segment-idle:hover {
+  @apply text-slate-700;
+}
+
 .location-pill {
   @apply rounded-2xl border px-4 py-2 text-sm font-semibold backdrop-blur-xl transition;
 }
@@ -176,9 +224,81 @@ a {
   letter-spacing: -0.06em;
 }
 
+.temperature-display-breathe {
+  display: inline-block;
+  transform-origin: left center;
+  will-change: transform;
+  animation: hero-temperature-breathe 8.2s cubic-bezier(0.42, 0.05, 0.58, 0.95) infinite;
+  text-shadow: 0 10px 22px rgba(14, 165, 233, 0.1);
+}
+
+@keyframes hero-temperature-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    text-shadow:
+      0 10px 22px rgba(14, 165, 233, 0.1),
+      0 0 0 rgba(56, 189, 248, 0);
+  }
+
+  50% {
+    transform: translateY(-1.5px) scale(1.024);
+    text-shadow:
+      0 15px 30px rgba(14, 165, 233, 0.13),
+      0 0 14px rgba(56, 189, 248, 0.08);
+  }
+}
+
+.accent-orb-drift {
+  will-change: transform, box-shadow;
+  animation: hero-orb-drift 11.5s ease-in-out infinite;
+}
+
+@keyframes hero-orb-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow:
+      0 20px 44px rgba(59, 130, 246, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  50% {
+    transform: translateY(-3px);
+    box-shadow:
+      0 24px 48px rgba(59, 130, 246, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .temperature-display-breathe,
+  .accent-orb-drift,
+  .chart-stage-in {
+    animation: none;
+  }
+}
+
 .forecast-sidebar-item {
   @apply rounded-2xl border border-white/40 bg-white/35 p-4 backdrop-blur-xl;
   box-shadow:
     0 16px 30px rgba(77, 126, 185, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.chart-stage-in {
+  will-change: transform, opacity;
+  animation: chart-stage-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes chart-stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.992);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

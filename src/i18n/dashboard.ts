@@ -198,7 +198,11 @@ export function getDashboardCopy(locale: AppLocale) {
         chip: 'Papan pemuka cuaca',
         title: 'Memuatkan paparan cuaca Tapah...',
         description:
-          'Sedang mengambil respons papan pemuka supaya susun atur kaca boleh dipaparkan bersama cuaca, kualiti udara, dan panduan hiking secara langsung.',
+          'Sedang mengambil data cuaca, kualiti udara, dan panduan hiking secara langsung.',
+        animationAlt: 'Animasi memuatkan Sandy Loading',
+        animationDescription:
+          'Animasi Lottie Sandy Loading digunakan semasa CPWeather mengambil data cuaca.',
+        credit: 'Animasi Sandy Loading oleh Parsa Navaei',
       },
       initialError: {
         chip: 'Ralat papan pemuka',
@@ -285,7 +289,11 @@ export function getDashboardCopy(locale: AppLocale) {
       chip: 'Weather Dashboard',
       title: "Loading Tapah's weather lens...",
       description:
-        'Pulling the shared dashboard response now so the glassmorphism layout can hydrate with live weather, air quality, and hiking guidance.',
+        'Pulling the shared dashboard response now so the weather, air quality, and hiking guidance can load.',
+      animationAlt: 'Sandy Loading animation',
+      animationDescription:
+        'The Sandy Loading Lottie animation is shown while CPWeather fetches weather data.',
+      credit: 'Sandy Loading animation by Parsa Navaei',
     },
     initialError: {
       chip: 'Dashboard Error',

@@ -5,7 +5,9 @@ import {
   getDashboardCopy,
   type AppLocale,
 } from '../../i18n/dashboard.ts'
+import { forecastSummaryClasses, rainChanceClasses } from './display.ts'
 import { WeatherIcon } from './icons.tsx'
+import { SemanticHighlight } from './SemanticHighlight.tsx'
 
 type ForecastSidebarProps = {
   selectedLocationLabel: string
@@ -25,7 +27,7 @@ export function ForecastSidebar({
   const copy = getDashboardCopy(locale)
 
   return (
-    <aside className="glass-panel min-w-0 p-5 sm:p-6">
+    <aside className="forecast-rail surface-panel min-w-0 p-5 sm:p-6">
       <div className="flex items-start gap-3">
         <span className="icon-pill shrink-0">
           <WeatherIcon />
@@ -51,9 +53,9 @@ export function ForecastSidebar({
             onBlur={() => onActiveForecastIndexChange(null)}
             className={`forecast-sidebar-item p-4 transition ${
               activeForecastIndex === index
-                ? 'border-sky-400/75 bg-sky-100/45 shadow-[0_22px_40px_rgba(14,165,233,0.18)]'
+                ? 'border-sky-400 bg-sky-50'
                 : index === 0
-                  ? 'border-sky-300/60 bg-sky-100/35'
+                  ? 'border-sky-300 bg-sky-50'
                   : ''
             }`}
           >
@@ -64,7 +66,7 @@ export function ForecastSidebar({
                     {formatWeekdayShort(day.date, locale)}
                   </p>
                   {index === 0 ? (
-                    <span className="glass-chip px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-700">
+                    <span className="surface-chip px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-700">
                       {copy.common.today}
                     </span>
                   ) : null}
@@ -84,13 +86,23 @@ export function ForecastSidebar({
             </div>
 
             <div className="mt-4 flex items-start justify-between gap-3 text-sm text-slate-600">
-              <span className="min-w-0 flex-1 leading-6">{day.summary}</span>
-              <span className="shrink-0 font-semibold text-sky-700">{day.rainChance}%</span>
+              <span className={`min-w-0 flex-1 font-semibold leading-6 ${forecastSummaryClasses(day.summary, day.rainChance)}`}>
+                <SemanticHighlight>{day.summary}</SemanticHighlight>
+              </span>
+              <span className={`surface-chip shrink-0 border px-2 py-1 text-xs font-bold ${rainChanceClasses(day.rainChance)}`}>
+                {day.rainChance}%
+              </span>
             </div>
 
             <div className="mt-3 h-2 rounded-full bg-white/55">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-sky-400 to-blue-500"
+                className={`h-full rounded-full ${
+                  day.rainChance >= 65
+                    ? 'bg-rose-500'
+                    : day.rainChance >= 45
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-500'
+                }`}
                 style={{ width: `${Math.min(day.rainChance, 100)}%` }}
               />
             </div>

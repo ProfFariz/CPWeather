@@ -16,12 +16,12 @@ import {
 } from '../../shared/dashboard.ts'
 import { cacheStatusClasses } from './display.ts'
 import {
+  BrandWeatherLogo,
   CheckIcon,
   ChevronDownIcon,
   ClockIcon,
   LocationPinIcon,
   RefreshIcon,
-  WeatherIcon,
 } from './icons.tsx'
 
 type DashboardHeaderProps = {
@@ -78,11 +78,11 @@ export function DashboardHeader({
   }, [])
 
   return (
-    <header className="glass-panel relative z-40 mb-6 p-4 sm:p-5">
+    <header className="dashboard-header surface-panel relative z-40 mb-6 p-4 sm:p-5">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 items-center gap-4">
           <span className="brand-mark shrink-0 text-white">
-            <WeatherIcon />
+            <BrandWeatherLogo />
           </span>
           <div className="min-w-0">
             <h1 className="truncate text-3xl font-semibold tracking-tight text-slate-900">
@@ -114,7 +114,7 @@ export function DashboardHeader({
               </span>
               <span
                 key={selectedLocationOption?.key ?? selectedLocation}
-                className="header-location-value-swap min-w-0 flex-1 text-left"
+                className="min-w-0 flex-1 text-left"
               >
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   {copy.header.locationLabel}
@@ -134,7 +134,7 @@ export function DashboardHeader({
 
             {isLocationMenuOpen ? (
               <div
-                className="header-location-menu header-location-menu-in"
+                className="header-location-menu"
                 role="listbox"
                 aria-label={copy.header.locationMenuTitle}
               >
@@ -148,7 +148,7 @@ export function DashboardHeader({
                 </div>
 
                 <div className="p-2">
-                  {activeLocations.map((location, index) => {
+                  {activeLocations.map((location) => {
                     const isActive = location.key === selectedLocation
 
                     return (
@@ -166,12 +166,11 @@ export function DashboardHeader({
                             ? 'header-location-option-active'
                             : 'header-location-option-idle'
                         }`}
-                        style={{ animationDelay: `${index * 55}ms` }}
                       >
                         <span
                           className={`header-location-option-icon ${
                             isActive
-                              ? 'header-location-option-icon-active header-location-check-pop'
+                              ? 'header-location-option-icon-active'
                               : 'header-location-option-icon-idle'
                           }`}
                         >
@@ -200,7 +199,7 @@ export function DashboardHeader({
             ) : null}
           </div>
 
-          <div className="glass-chip gap-1 p-1">
+          <div className="surface-chip gap-1 p-1">
             {(['bm', 'en'] as const).map((language) => {
               const isActive = language === locale
 
@@ -221,7 +220,7 @@ export function DashboardHeader({
             })}
           </div>
 
-          <div className="glass-chip justify-between gap-4 px-4 py-3 sm:min-w-[13rem]">
+          <div className="surface-chip justify-between gap-4 px-4 py-3 sm:min-w-[13rem]">
             <div className="flex items-center gap-3">
               <span className="text-slate-500">
                 <ClockIcon />
@@ -252,7 +251,7 @@ export function DashboardHeader({
             aria-label={copy.common.refresh}
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="glass-icon-button disabled:cursor-wait disabled:opacity-75"
+            className="icon-button disabled:cursor-wait disabled:opacity-75"
           >
             <RefreshIcon />
           </button>

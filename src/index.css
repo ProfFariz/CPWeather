@@ -3,7 +3,7 @@
 
 :root {
   color: #11223c;
-  background-color: #dfeeff;
+  background-color: #000;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -23,35 +23,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.72), transparent 22%),
-    radial-gradient(circle at 88% 18%, rgba(150, 202, 255, 0.36), transparent 24%),
-    radial-gradient(circle at 50% 78%, rgba(188, 226, 255, 0.44), transparent 28%),
-    linear-gradient(135deg, #d8ebff 0%, #eaf5ff 38%, #dcecff 100%);
+  background: #000;
   color: #11223c;
-}
-
-body::before,
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-}
-
-body::before {
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.78), transparent 24%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.2), transparent 36%);
-  opacity: 0.9;
-}
-
-body::after {
-  background:
-    radial-gradient(circle at 78% 25%, rgba(59, 130, 246, 0.1), transparent 18%),
-    radial-gradient(circle at 25% 70%, rgba(96, 165, 250, 0.12), transparent 22%);
-  filter: blur(18px);
-  opacity: 0.8;
 }
 
 button,
@@ -76,11 +49,25 @@ a {
 
 .page-shell {
   min-height: 100vh;
+  position: relative;
 }
 
 .page-grid {
   position: relative;
   z-index: 1;
+}
+
+.shader-gradient-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #000;
+  pointer-events: none;
+}
+
+.shader-gradient-background canvas {
+  display: block;
 }
 
 .glass-panel {
@@ -109,6 +96,76 @@ a {
   box-shadow:
     0 12px 24px rgba(77, 126, 185, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.surface-panel,
+.surface-section,
+.surface-widget {
+  @apply rounded-2xl border border-white/45 bg-white/40 backdrop-blur-xl;
+  box-shadow:
+    0 24px 60px rgba(77, 126, 185, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
+.surface-section,
+.surface-widget {
+  box-shadow:
+    0 16px 32px rgba(77, 126, 185, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.surface-chip {
+  @apply inline-flex items-center gap-2 rounded-2xl border border-white/45 bg-white/50 backdrop-blur-xl;
+  box-shadow:
+    0 12px 24px rgba(77, 126, 185, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.semantic-term {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.65rem;
+  padding: 0.05rem 0.34rem;
+  font-weight: 800;
+  line-height: 1.45;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.semantic-term-good {
+  background: rgba(16, 185, 129, 0.16);
+  color: #047857;
+}
+
+.semantic-term-caution {
+  background: rgba(245, 158, 11, 0.18);
+  color: #b45309;
+}
+
+.semantic-term-danger {
+  background: rgba(244, 63, 94, 0.16);
+  color: #be123c;
+}
+
+.semantic-term-info {
+  background: rgba(14, 165, 233, 0.14);
+  color: #0369a1;
+}
+
+.icon-button {
+  @apply inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/45 bg-white/45 text-sky-700 backdrop-blur-xl transition;
+  box-shadow:
+    0 14px 28px rgba(77, 126, 185, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.icon-button:hover {
+  @apply bg-white/60 text-sky-800;
+}
+
+.icon-button:focus-visible {
+  outline: 3px solid rgba(14, 165, 233, 0.34);
+  outline-offset: 3px;
 }
 
 .primary-button {
@@ -146,9 +203,177 @@ a {
 
 .brand-mark {
   @apply inline-flex h-16 w-16 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-sky-500 to-blue-600 text-white;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   box-shadow:
     0 22px 46px rgba(59, 130, 246, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.brand-mark::before {
+  content: '';
+  position: absolute;
+  inset: -36%;
+  z-index: -1;
+  background:
+    conic-gradient(from 110deg, transparent 0 18%, rgba(125, 255, 253, 0.46) 28%, transparent 40% 100%),
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.42), transparent 24%);
+  animation: brand-mark-aurora 9s linear infinite;
+}
+
+.brand-weather-logo {
+  position: relative;
+  overflow: visible;
+  filter: drop-shadow(0 10px 18px rgba(8, 47, 73, 0.2));
+}
+
+.brand-logo-atmosphere {
+  fill: rgba(186, 230, 253, 0.14);
+  stroke: rgba(255, 255, 255, 0.36);
+  stroke-width: 1.5;
+}
+
+.brand-logo-orbit {
+  stroke: rgba(224, 242, 254, 0.78);
+  stroke-width: 2.1;
+  stroke-dasharray: 18 10;
+  stroke-linecap: round;
+  transform-origin: 32px 32px;
+  animation: brand-logo-orbit-spin 12s linear infinite;
+}
+
+.brand-logo-sun {
+  transform-origin: 22px 22px;
+  animation: brand-logo-sun-pulse 4.8s ease-in-out infinite;
+}
+
+.brand-logo-sun circle {
+  fill: rgba(255, 255, 255, 0.98);
+}
+
+.brand-logo-sun path,
+.brand-logo-cloud path,
+.brand-logo-rain path,
+.brand-logo-signal path {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.brand-logo-sun path {
+  stroke-width: 2.4;
+  opacity: 0.72;
+}
+
+.brand-logo-cloud {
+  transform-origin: 33px 35px;
+  animation: brand-logo-cloud-drift 6.4s ease-in-out infinite;
+}
+
+.brand-logo-cloud path:first-child {
+  fill: rgba(255, 255, 255, 0.42);
+  stroke-width: 2;
+}
+
+.brand-logo-cloud path:last-child {
+  stroke-width: 2.6;
+  opacity: 0.86;
+}
+
+.brand-logo-rain path {
+  stroke-width: 2.8;
+  stroke-dasharray: 8 8;
+  animation: brand-logo-rain-fall 1.6s ease-in-out infinite;
+}
+
+.brand-logo-rain path:nth-child(2) {
+  animation-delay: 180ms;
+}
+
+.brand-logo-rain path:nth-child(3) {
+  animation-delay: 360ms;
+}
+
+.brand-logo-signal {
+  transform-origin: 50px 23px;
+  animation: brand-logo-signal-pulse 3.6s ease-in-out infinite;
+}
+
+.brand-logo-signal path {
+  stroke-width: 2;
+  opacity: 0.76;
+}
+
+.brand-logo-signal circle {
+  fill: currentColor;
+  opacity: 0.86;
+}
+
+@keyframes brand-mark-aurora {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes brand-logo-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes brand-logo-sun-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.94;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes brand-logo-cloud-drift {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+
+  50% {
+    transform: translateX(1.5px) translateY(-1px);
+  }
+}
+
+@keyframes brand-logo-rain-fall {
+  0% {
+    opacity: 0.24;
+    stroke-dashoffset: 8;
+  }
+
+  45%,
+  70% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0.24;
+    stroke-dashoffset: -8;
+  }
+}
+
+@keyframes brand-logo-signal-pulse {
+  0%,
+  100% {
+    opacity: 0.48;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
 }
 
 .header-location-picker {
@@ -306,11 +531,199 @@ a {
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
+.command-hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-current-row {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 10rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.hero-weather-signal {
+  width: clamp(7.5rem, 14vw, 10rem);
+  max-width: 100%;
+}
+
+.hero-temperature-block,
+.hero-copy-block {
+  min-width: 0;
+}
+
+.hero-temperature-block {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+}
+
+.hero-copy-block {
+  grid-column: 2;
+  grid-row: 2;
+  max-width: 34rem;
+}
+
+.hero-current-row .hero-weather-signal {
+  grid-row: 1 / span 2;
+}
+
+.weather-signal-icon {
+  display: block;
+  height: auto;
+  overflow: visible;
+}
+
+.weather-signal-grid path,
+.weather-signal-sun path,
+.weather-signal-cloud path,
+.weather-signal-rain path,
+.weather-signal-route {
+  fill: none;
+  stroke: rgba(14, 116, 144, 0.28);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.weather-signal-sun circle {
+  fill: rgba(14, 165, 233, 0.22);
+  stroke: #0284c7;
+  stroke-width: 4;
+}
+
+.weather-signal-cloud path {
+  fill: rgba(255, 255, 255, 0.72);
+  stroke: #0284c7;
+}
+
+.weather-signal-rain path,
+.weather-signal-route {
+  stroke: #0284c7;
+  stroke-width: 5;
+}
+
+.weather-signal-icon-sun .weather-signal-cloud,
+.weather-signal-icon-sun .weather-signal-rain,
+.weather-signal-icon-cloud .weather-signal-sun,
+.weather-signal-icon-cloud .weather-signal-rain,
+.weather-signal-icon-rain .weather-signal-sun {
+  opacity: 0.18;
+}
+
 .temperature-display {
-  font-size: clamp(4.5rem, 11vw, 7rem);
-  line-height: 0.95;
+  display: block;
+  width: clamp(11rem, 23vw, 16rem);
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+  color: #0369a1;
+  filter: drop-shadow(0 20px 34px rgba(14, 116, 144, 0.18));
+}
+
+.temperature-display-orbit path {
+  stroke: rgba(14, 165, 233, 0.32);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 20 14;
+  animation: temperature-orbit-flow 8s linear infinite;
+}
+
+.temperature-display-orbit path:last-child {
+  stroke: rgba(16, 185, 129, 0.26);
+  stroke-dasharray: 12 16;
+  animation-duration: 6.5s;
+  animation-direction: reverse;
+}
+
+.temperature-display-sun {
+  transform-origin: 53px 42px;
+  animation: temperature-sun-pulse 5.6s ease-in-out infinite;
+}
+
+.temperature-display-sun circle {
+  fill: rgba(251, 191, 36, 0.24);
+  stroke: rgba(2, 132, 199, 0.55);
+  stroke-width: 3;
+}
+
+.temperature-display-sun path,
+.temperature-display-cloud path,
+.temperature-display-gauge path,
+.temperature-display-heat-lines path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.temperature-display-sun path {
+  stroke-width: 3;
+  opacity: 0.5;
+}
+
+.temperature-display-cloud {
+  transform-origin: 88px 110px;
+  animation: temperature-cloud-drift 7.2s ease-in-out infinite;
+}
+
+.temperature-display-cloud path:first-child {
+  fill: rgba(255, 255, 255, 0.5);
+  stroke-width: 2.5;
+  opacity: 0.9;
+}
+
+.temperature-display-cloud path:last-child {
+  stroke-width: 3.5;
+  opacity: 0.82;
+}
+
+.temperature-display-reading text {
+  fill: currentColor;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  font-size: 86px;
   font-weight: 800;
-  letter-spacing: -0.06em;
+  letter-spacing: -0.08em;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.42);
+  stroke-width: 2;
+}
+
+.temperature-display-reading .temperature-display-degree {
+  font-size: 46px;
+  letter-spacing: -0.02em;
+  animation: temperature-degree-pop 4.8s ease-in-out infinite;
+}
+
+.temperature-display-gauge {
+  animation: temperature-gauge-breathe 5.8s ease-in-out infinite;
+}
+
+.temperature-display-gauge path {
+  stroke-width: 7;
+}
+
+.temperature-display-gauge circle {
+  fill: rgba(14, 165, 233, 0.18);
+  stroke: currentColor;
+  stroke-width: 4;
+}
+
+.temperature-display-heat-lines path {
+  stroke-width: 3.2;
+  opacity: 0.52;
+  stroke-dasharray: 18 18;
+  animation: temperature-heat-rise 2.8s ease-in-out infinite;
+}
+
+.temperature-display-heat-lines path:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.temperature-display-heat-lines path:nth-child(3) {
+  animation-delay: 320ms;
 }
 
 .temperature-display-breathe {
@@ -467,6 +880,79 @@ a {
   }
 }
 
+@keyframes temperature-orbit-flow {
+  to {
+    stroke-dashoffset: -68;
+  }
+}
+
+@keyframes temperature-sun-pulse {
+  0%,
+  100% {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes temperature-cloud-drift {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+
+  50% {
+    transform: translateX(3px) translateY(-2px);
+  }
+}
+
+@keyframes temperature-degree-pop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-3px) scale(1.08);
+  }
+}
+
+@keyframes temperature-gauge-breathe {
+  0%,
+  100% {
+    opacity: 0.84;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes temperature-heat-rise {
+  0% {
+    opacity: 0.18;
+    stroke-dashoffset: 18;
+    transform: translateY(3px);
+  }
+
+  45%,
+  70% {
+    opacity: 0.64;
+  }
+
+  100% {
+    opacity: 0.18;
+    stroke-dashoffset: -18;
+    transform: translateY(-3px);
+  }
+}
+
 @keyframes header-location-menu-in {
   from {
     opacity: 0;
@@ -545,6 +1031,18 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .temperature-display-breathe,
   .accent-orb-drift,
+  .brand-mark::before,
+  .brand-logo-orbit,
+  .brand-logo-sun,
+  .brand-logo-cloud,
+  .brand-logo-rain path,
+  .brand-logo-signal,
+  .temperature-display-orbit path,
+  .temperature-display-sun,
+  .temperature-display-cloud,
+  .temperature-display-reading .temperature-display-degree,
+  .temperature-display-gauge,
+  .temperature-display-heat-lines path,
   .chart-stage-in,
   .header-location-menu-in,
   .header-location-option,
@@ -664,5 +1162,44 @@ a {
       0 28px 54px rgba(14, 165, 233, 0.28),
       0 0 34px rgba(56, 189, 248, 0.24),
       inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  }
+}
+
+@media (max-width: 1180px) {
+  .hero-current-row {
+    grid-template-columns: minmax(6.5rem, 8rem) minmax(0, 1fr);
+  }
+
+  .hero-copy-block {
+    max-width: 42rem;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .page-grid {
+    padding-inline: 1rem;
+  }
+
+  .hero-current-row {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-temperature-block,
+  .hero-copy-block,
+  .hero-current-row .hero-weather-signal {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .hero-weather-signal {
+    width: 8rem;
+  }
+
+  .temperature-display {
+    width: min(15rem, 92vw);
   }
 }

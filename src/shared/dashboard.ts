@@ -1,6 +1,7 @@
 export type LocationKey =
   | 'tapah'
   | 'ipoh'
+  | 'cameron-highlands'
   | 'taiping'
   | 'lumut'
   | 'gopeng'
@@ -111,6 +112,7 @@ export const defaultDashboardLocale: DashboardLocale = 'en'
 export const locations: LocationOption[] = [
   { key: 'tapah', label: 'Tapah' },
   { key: 'ipoh', label: 'Ipoh' },
+  { key: 'cameron-highlands', label: 'Cameron Highlands' },
   { key: 'taiping', label: 'Taiping' },
   { key: 'lumut', label: 'Lumut' },
   { key: 'gopeng', label: 'Gopeng' },

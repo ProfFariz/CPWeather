@@ -138,6 +138,49 @@ export const dashboardMocks = {
       { date: '2026-04-21', high: 34, low: 24, rainChance: 58, humidity: 79, summary: 'Heat then late storm' },
     ],
   },
+  'cameron-highlands': {
+    label: 'Cameron Highlands',
+    district: 'Tanah Rata, Pahang',
+    updatedAt: '2026-04-17T09:10:00+08:00',
+    cacheAgeMinutes: 6,
+    overview:
+      'Cool highland air keeps the temperature comfortable, but mist and sudden light rain can arrive quickly on exposed ridges.',
+    nextRainWindow: 'Best dry window: 8 AM to 1 PM',
+    currentTemp: 22,
+    currentSummary: 'Light drizzle with cool mist',
+    aqi: 42,
+    airBand: 'Good',
+    pollutants: { pm25: 11, pm10: 20, o3: 12, no2: 5 },
+    hikeTip: {
+      target: 'Cameron Highlands ridge walk',
+      verdict: 'Caution',
+      confidence: 72,
+      title: 'A short route is workable if visibility stays open.',
+      reason:
+        'The air is clean and the temperature is comfortable, but highland mist and light rain can reduce visibility quickly after lunch.',
+      cues: [
+        { label: 'AQI 42 good', tone: 'positive' },
+        { label: 'Cool trail temperature', tone: 'positive' },
+        { label: 'Mist and drizzle risk', tone: 'caution' },
+      ],
+    },
+    warnings: [
+      {
+        title: 'Highland mist and passing rain',
+        severity: 'Monitor',
+        window: '1 PM - 6 PM',
+        message:
+          'Keep the route short and avoid exposed viewpoints if cloud cover thickens.',
+      },
+    ],
+    forecast: [
+      { date: '2026-04-17', high: 24, low: 17, rainChance: 58, humidity: 88, summary: 'Cool with light rain' },
+      { date: '2026-04-18', high: 23, low: 17, rainChance: 62, humidity: 89, summary: 'Mist and showers' },
+      { date: '2026-04-19', high: 24, low: 16, rainChance: 44, humidity: 84, summary: 'Cloudy bright breaks' },
+      { date: '2026-04-20', high: 25, low: 17, rainChance: 49, humidity: 85, summary: 'Drizzle later' },
+      { date: '2026-04-21', high: 24, low: 17, rainChance: 57, humidity: 87, summary: 'Wet highland afternoon' },
+    ],
+  },
   taiping: {
     label: 'Taiping',
     district: 'Larut, Matang dan Selama, Perak',

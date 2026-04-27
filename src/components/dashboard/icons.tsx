@@ -28,6 +28,45 @@ export function WeatherIcon({ className = '' }: IconProps) {
   )
 }
 
+export function BrandWeatherLogo({ className = '' }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      className={`brand-weather-logo h-9 w-9 ${className}`.trim()}
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle className="brand-logo-atmosphere" cx="32" cy="32" r="27" />
+      <path
+        className="brand-logo-orbit"
+        d="M12.5 35.5C16 20.8 28.7 11.9 41.8 15.3C52.8 18.1 58.4 29 54.2 39.1C49.6 50.2 35 55.3 22.5 49.6C13.6 45.5 9.2 39.6 12.5 35.5Z"
+      />
+      <g className="brand-logo-sun">
+        <circle cx="22" cy="22" r="7.5" />
+        <path d="M22 9.5V13" />
+        <path d="M22 31V34.5" />
+        <path d="M9.5 22H13" />
+        <path d="M31 22H34.5" />
+        <path d="M13.2 13.2L15.7 15.7" />
+        <path d="M28.3 28.3L30.8 30.8" />
+      </g>
+      <g className="brand-logo-cloud">
+        <path d="M19.5 41.2C17.1 41.2 15.2 39.3 15.2 36.9C15.2 34.7 16.8 32.9 19 32.6C19.9 28 23.9 24.6 28.7 24.6C32.6 24.6 36 26.9 37.5 30.2C38.6 29.7 39.8 29.5 41.1 29.5C46.1 29.5 50.2 33.6 50.2 38.6C50.2 39.5 50.1 40.4 49.8 41.2H19.5Z" />
+        <path d="M21 41.2H48.3" />
+      </g>
+      <g className="brand-logo-rain">
+        <path d="M26 46.5L23.5 53" />
+        <path d="M34 46.5L31.5 53" />
+        <path d="M42 46.5L39.5 53" />
+      </g>
+      <g className="brand-logo-signal">
+        <path d="M46.5 15.5C50 17.5 52.5 20.9 53.1 24.8" />
+        <circle cx="54" cy="29" r="1.6" />
+      </g>
+    </svg>
+  )
+}
+
 export function ThermometerIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">

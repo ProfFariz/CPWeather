@@ -2,7 +2,7 @@
 
 CPWeather is a Perak-focused weather dashboard built for the things that actually affect local plans: haze, sudden rain, live warnings, and whether today still feels safe for an outdoor trip.
 
-The current experience is a glassmorphism dashboard with Tapah as the default view, a live temperature hero, a vertical 5-day forecast, a forecast chart, warning detail, air-quality status, and a hiking recommendation that explains itself.
+The current experience is a clean solid-surface dashboard with Tapah as the default view, a full-page Sandy Loading Lottie startup state, a live temperature hero, a vertical 5-day forecast, a forecast chart, warning detail, air-quality status, and a hiking recommendation that explains itself.
 
 ## Presentation Summary
 
@@ -14,7 +14,7 @@ The current experience is a glassmorphism dashboard with Tapah as the default vi
 ## What A User Can Do In The App
 
 - Open the dashboard and immediately see the latest Tapah weather briefing.
-- Switch between Tapah, Ipoh, Taiping, and Lumut.
+- Switch between supported Perak locations including Tapah, Ipoh, Taiping, Lumut, Gopeng, Gerik, Kampong Gajah, Sungkai, and Teluk Intan.
 - View the current temperature, overview, and next rain window.
 - Check AQI and pollutant-related outdoor comfort.
 - Read location-specific warning cards from Malaysia weather data.
@@ -31,7 +31,7 @@ The current experience is a glassmorphism dashboard with Tapah as the default vi
 3. If fresh cached data exists, it renders immediately.
 4. The frontend then fetches `/api/dashboard?location=...`.
 5. The backend combines live weather providers into one shared response.
-6. The frontend renders the glass dashboard cards, chart, warnings, and hiking tip.
+6. The frontend renders the dashboard cards, chart, warnings, and hiking tip.
 7. The latest payload is written back to cache for the next visit.
 
 ## Simple Developer Flow
@@ -70,7 +70,7 @@ flowchart LR
   I --> J
   J --> K["Compute temp, rain window, warnings, hike tip"]
   K --> L["Return shared payload"]
-  L --> M["Frontend renders glass dashboard"]
+  L --> M["Frontend renders dashboard"]
   M --> N["Save payload into localStorage cache"]
 ```
 
@@ -78,7 +78,8 @@ flowchart LR
 
 - React + TypeScript + Vite app scaffolded and working.
 - Tailwind CSS integrated through Vite.
-- Glassmorphism interface with pastel blue background and white translucent cards.
+- Solid, accessible dashboard interface with restrained motion and clear interactive states.
+- Full-page Sandy Loading Lottie loading screen using a local JSON asset.
 - Tapah-first landing experience with live hero temperature.
 - Vertical 5-day forecast sidebar.
 - Forecast chart using Chart.js.
@@ -105,6 +106,11 @@ flowchart LR
 - Ipoh
 - Taiping
 - Lumut
+- Gopeng
+- Gerik
+- Kampong Gajah
+- Sungkai
+- Teluk Intan
 
 ## Current Dashboard Sections
 
@@ -116,6 +122,10 @@ flowchart LR
 - 5-day forecast sidebar
 - Forecast trend chart
 - Live warning feed
+
+## Asset Credits
+
+- Loading animation: Sandy Loading by Parsa Navaei, sourced from LottieFiles and stored locally as [src/assets/sandy-loading.json](./src/assets/sandy-loading.json).
 
 ## API Route
 

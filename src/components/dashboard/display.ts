@@ -91,6 +91,54 @@ export function warningToneClasses(severity: Severity) {
   return 'border-sky-200/70 bg-sky-100/45 text-sky-800'
 }
 
+export function rainChanceClasses(rainChance: number) {
+  if (rainChance >= 65) {
+    return 'border-rose-200/80 bg-rose-500/16 text-rose-800'
+  }
+
+  if (rainChance >= 45) {
+    return 'border-amber-200/80 bg-amber-400/18 text-amber-800'
+  }
+
+  return 'border-emerald-200/80 bg-emerald-500/14 text-emerald-800'
+}
+
+export function airQualityMetricClasses(airBand: AirBand) {
+  if (airBand === 'Good') {
+    return 'text-emerald-700'
+  }
+
+  if (airBand === 'Moderate') {
+    return 'text-amber-700'
+  }
+
+  return 'text-rose-700'
+}
+
+export function forecastSummaryClasses(summary: string, rainChance: number) {
+  const normalizedSummary = summary.toLowerCase()
+
+  if (
+    rainChance >= 65 ||
+    normalizedSummary.includes('storm') ||
+    normalizedSummary.includes('thunder')
+  ) {
+    return 'text-rose-800'
+  }
+
+  if (
+    rainChance >= 45 ||
+    normalizedSummary.includes('rain') ||
+    normalizedSummary.includes('drizzle') ||
+    normalizedSummary.includes('shower') ||
+    normalizedSummary.includes('mist')
+  ) {
+    return 'text-amber-800'
+  }
+
+  return 'text-emerald-800'
+}
+
 export function resolveCurrentTemp(payload: DashboardPayload) {
   if (typeof payload.snapshot.currentTemp === 'number') {
     return payload.snapshot.currentTemp

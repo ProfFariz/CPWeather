@@ -19,6 +19,8 @@ import { DashboardInitialErrorState } from './components/dashboard/DashboardInit
 import { DashboardLoadingState } from './components/dashboard/DashboardLoadingState.tsx'
 import { ForecastSidebar } from './components/dashboard/ForecastSidebar.tsx'
 import { ForecastTrendChart } from './components/dashboard/ForecastTrendChart.tsx'
+import { SemanticHighlight } from './components/dashboard/SemanticHighlight.tsx'
+import { ShaderGradientBackground } from './components/dashboard/ShaderGradientBackground.tsx'
 import { WarningFeed } from './components/dashboard/WarningFeed.tsx'
 
 function App() {
@@ -43,11 +45,21 @@ function App() {
   }, [locale])
 
   if (!payload && isLoading) {
-    return <DashboardLoadingState locale={locale} />
+    return (
+      <>
+        <ShaderGradientBackground />
+        <DashboardLoadingState locale={locale} />
+      </>
+    )
   }
 
   if (!payload) {
-    return <DashboardInitialErrorState locale={locale} error={error} onRetry={refresh} />
+    return (
+      <>
+        <ShaderGradientBackground />
+        <DashboardInitialErrorState locale={locale} error={error} onRetry={refresh} />
+      </>
+    )
   }
 
   const forecastDays = payload.snapshot.forecast.slice(0, 5)
@@ -57,6 +69,7 @@ function App() {
 
   return (
     <div className="page-shell">
+      <ShaderGradientBackground />
       <div className="page-grid mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
         <DashboardHeader
           locale={locale}
@@ -78,9 +91,11 @@ function App() {
           <div className="glass-panel mb-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-700">
-                {copy.banner.lastFetchWarning}
+                <SemanticHighlight>{copy.banner.lastFetchWarning}</SemanticHighlight>
               </p>
-              <p className="mt-2 text-sm font-medium text-slate-700">{error}</p>
+              <p className="mt-2 text-sm font-medium text-slate-700">
+                <SemanticHighlight>{error}</SemanticHighlight>
+              </p>
             </div>
             <button type="button" onClick={refresh} className="secondary-button">
               {copy.common.retry}
@@ -119,9 +134,11 @@ function App() {
         </section>
 
         <footer className="mt-6 px-4 text-center text-xs font-semibold uppercase leading-6 tracking-[0.22em] text-sky-700/75">
-          {copy.footer.servedAt} {formatFooterTime(payload.meta.servedAt, locale)} -{' '}
-          {copy.footer.apiCacheTtl} {payload.meta.cacheTtlMinutes} {copy.common.minutes} -{' '}
-          {copy.footer.localCache} {DASHBOARD_CACHE_TTL_MINUTES} {copy.common.minutes}
+          <SemanticHighlight>{copy.footer.servedAt}</SemanticHighlight>{' '}
+          {formatFooterTime(payload.meta.servedAt, locale)} -{' '}
+          <SemanticHighlight>{copy.footer.apiCacheTtl}</SemanticHighlight> {payload.meta.cacheTtlMinutes}{' '}
+          {copy.common.minutes} - <SemanticHighlight>{copy.footer.localCache}</SemanticHighlight>{' '}
+          {DASHBOARD_CACHE_TTL_MINUTES} {copy.common.minutes}
         </footer>
       </div>
     </div>

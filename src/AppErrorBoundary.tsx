@@ -46,8 +46,8 @@ class AppErrorBoundary extends Component<
     return (
       <div className="page-shell">
         <div className="page-grid mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-          <section className="glass-panel p-8 text-center sm:p-10">
-            <span className="glass-chip text-xs uppercase tracking-[0.28em] text-sky-700">
+          <section className="surface-panel p-8 text-center sm:p-10">
+            <span className="surface-chip text-xs uppercase tracking-[0.28em] text-sky-700">
               App Recovery
             </span>
             <h1 className="mt-5 text-balance text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
@@ -58,7 +58,7 @@ class AppErrorBoundary extends Component<
               screen instead of a white page.
             </p>
 
-            <div className="mx-auto mt-6 max-w-2xl rounded-3xl border border-rose-200/60 bg-rose-100/40 p-4 text-left backdrop-blur-xl">
+            <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-rose-200 bg-rose-50 p-4 text-left">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-700">
                 Error message
               </p>

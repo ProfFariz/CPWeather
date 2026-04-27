@@ -17,6 +17,7 @@ import { type ForecastDay } from '../../shared/dashboard.ts'
 import { getDashboardCopy, type AppLocale } from '../../i18n/dashboard.ts'
 import { formatForecastLabel } from './display.ts'
 import { ChartIcon } from './icons.tsx'
+import { SemanticHighlight } from './SemanticHighlight.tsx'
 
 ChartJS.register(
   BarElement,
@@ -48,19 +49,28 @@ export function ForecastTrendChart({
 }: ForecastTrendChartProps) {
   const copy = getDashboardCopy(locale)
   const highlightedIndex = activeForecastIndex ?? 0
+  const rainBarColor = (rainChance: number, index: number) => {
+    const opacity = index === highlightedIndex ? 0.42 : index === 0 ? 0.3 : 0.2
+
+    if (rainChance >= 65) {
+      return `rgba(244, 63, 94, ${opacity})`
+    }
+
+    if (rainChance >= 45) {
+      return `rgba(245, 158, 11, ${opacity})`
+    }
+
+    return `rgba(16, 185, 129, ${opacity})`
+  }
 
   const rainDataset: ChartDataset<ForecastChartType> = {
     type: 'bar',
     label: copy.chart.datasets.rain,
     data: forecastDays.map((day) => day.rainChance),
-    backgroundColor: forecastDays.map((_, index) =>
-      index === highlightedIndex
-        ? 'rgba(14, 165, 233, 0.34)'
-        : index === 0
-          ? 'rgba(14, 165, 233, 0.24)'
-          : 'rgba(14, 165, 233, 0.14)',
+    backgroundColor: forecastDays.map((day, index) => rainBarColor(day.rainChance, index)),
+    borderColor: forecastDays.map((day) =>
+      day.rainChance >= 65 ? '#e11d48' : day.rainChance >= 45 ? '#d97706' : '#059669',
     ),
-    borderColor: '#0ea5e9',
     borderRadius: 999,
     borderSkipped: false,
     maxBarThickness: 22,
@@ -126,8 +136,8 @@ export function ForecastTrendChart({
     maintainAspectRatio: false,
     locale: locale === 'bm' ? 'ms-MY' : 'en-US',
     animation: {
-      duration: 620,
-      easing: 'easeOutQuart',
+      duration: 180,
+      easing: 'easeOutCubic',
     },
     interaction: {
       intersect: false,
@@ -283,7 +293,7 @@ export function ForecastTrendChart({
   }
 
   return (
-    <article className="glass-panel min-w-0 p-5 sm:p-7">
+    <article className="analytics-panel surface-panel min-w-0 p-5 sm:p-7">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex items-center gap-3 text-sky-600">
@@ -295,27 +305,19 @@ export function ForecastTrendChart({
                 {copy.chart.eyebrow}
               </p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-                {copy.chart.title(selectedLocationLabel)}
+                <SemanticHighlight>{copy.chart.title(selectedLocationLabel)}</SemanticHighlight>
               </h2>
             </div>
           </div>
         </div>
         <p className="max-w-sm text-sm leading-7 text-slate-600">
-          {copy.chart.description}
+          <SemanticHighlight>{copy.chart.description}</SemanticHighlight>
         </p>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.16em]">
-        {copy.chart.badges.map((badge) => (
-          <span key={badge} className="glass-chip text-slate-700">
-            {badge}
-          </span>
-        ))}
       </div>
 
       <div
         key={`${selectedLocationLabel}-${locale}`}
-        className="chart-stage-in mt-6 h-[260px] rounded-2xl border border-white/40 bg-white/30 p-3 backdrop-blur-xl sm:h-[320px] sm:p-5"
+        className="chart-canvas-frame mt-6 h-[260px] rounded-2xl border border-slate-200 bg-white p-3 sm:h-[320px] sm:p-5"
         onMouseLeave={() => onActiveForecastIndexChange(null)}
       >
         <Chart<'bar' | 'line'> type="bar" data={forecastChartData} options={chartOptions} />

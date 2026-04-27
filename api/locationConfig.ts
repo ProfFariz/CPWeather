@@ -26,6 +26,14 @@ export const liveLocationConfig: Record<LocationKey, LiveLocationConfig> = {
     hikeTarget: 'Kledang Hill route',
     warningAliases: ['Ipoh', 'Kinta', 'Kampar', 'Kuala Kangsar'],
   },
+  'cameron-highlands': {
+    key: 'cameron-highlands',
+    lat: 4.4709,
+    lon: 101.376,
+    malaysiaLocationName: 'Cameron Highlands',
+    hikeTarget: 'Cameron Highlands ridge walk',
+    warningAliases: ['Cameron Highlands', 'Cameron', 'Tanah Rata', 'Brinchang'],
+  },
   taiping: {
     key: 'taiping',
     lat: 4.85,

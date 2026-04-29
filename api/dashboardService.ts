@@ -137,6 +137,20 @@ type HikeDecisionSignals = {
   highestWarningSeverity: Severity | null
 }
 
+type BuildDashboardPayloadOptions = {
+  openWeatherApiKey?: string
+}
+
+function getOpenWeatherApiKey(options?: BuildDashboardPayloadOptions) {
+  if (options?.openWeatherApiKey) {
+    return options.openWeatherApiKey
+  }
+
+  return typeof process !== 'undefined'
+    ? process.env.OPENWEATHER_API_KEY
+    : undefined
+}
+
 const malaysiaForecastTranslations: Record<string, string> = {
   Berjerebu: 'Hazy',
   'Tiada hujan': 'No rain',
@@ -1213,6 +1227,7 @@ function getSourceFromProviders(
 export async function buildDashboardPayload(
   locationKey: LocationKey,
   locale: DashboardLocale = 'en',
+  options?: BuildDashboardPayloadOptions,
 ): Promise<DashboardPayload> {
   const fallbackPayload = buildMockDashboardPayload(locationKey, locale)
   const location = liveLocationConfig[locationKey]
@@ -1223,7 +1238,7 @@ export async function buildDashboardPayload(
 
   const now = new Date()
   const servedAt = new Date().toISOString()
-  const openWeatherApiKey = process.env.OPENWEATHER_API_KEY
+  const openWeatherApiKey = getOpenWeatherApiKey(options)
   let warningSignals = {
     activeWarning: null as WarningSignal | null,
     nextWarning: null as WarningSignal | null,

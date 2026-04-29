@@ -67,6 +67,47 @@ export function BrandWeatherLogo({ className = '' }: IconProps) {
   )
 }
 
+export function BrandWordmark({ className = '' }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 248 50"
+      className={`brand-wordmark ${className}`.trim()}
+      role="img"
+      aria-label="CPWeather"
+    >
+      <defs>
+        <linearGradient id="brand-wordmark-text" x1="0" y1="0" x2="248" y2="0">
+          <stop offset="0%" stopColor="#0f172a" />
+          <stop offset="48%" stopColor="#0e7490" />
+          <stop offset="100%" stopColor="#075985" />
+        </linearGradient>
+        <linearGradient id="brand-wordmark-sheen" x1="-40" y1="0" x2="48" y2="0">
+          <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+          <stop offset="48%" stopColor="rgba(255,255,255,0.75)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+        </linearGradient>
+      </defs>
+
+      <g className="brand-wordmark-weather" aria-hidden="true">
+        <circle className="brand-wordmark-sun" cx="18" cy="15" r="6.5" />
+        <path
+          className="brand-wordmark-cloud"
+          d="M12 34.5C9.2 34.5 7 32.3 7 29.6C7 27.2 8.8 25.1 11.1 24.7C12.1 19.8 16.4 16.2 21.5 16.2C25.5 16.2 29 18.4 30.8 21.7C31.9 21.3 33.1 21.1 34.4 21.1C39.8 21.1 44.1 25.4 44.1 30.8C44.1 32.1 43.9 33.3 43.4 34.5H12Z"
+        />
+        <path className="brand-wordmark-rain" d="M18 39L16.5 43.5" />
+        <path className="brand-wordmark-rain" d="M29 39L27.5 43.5" />
+        <path className="brand-wordmark-rain" d="M40 39L38.5 43.5" />
+      </g>
+
+      <text className="brand-wordmark-text" x="55" y="34">
+        CPWeather
+      </text>
+      <rect className="brand-wordmark-sheen" x="-64" y="5" width="42" height="34" rx="17" />
+      <path className="brand-wordmark-underline" d="M57 42C95 47 164 47 225 42" />
+    </svg>
+  )
+}
+
 export function ThermometerIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">

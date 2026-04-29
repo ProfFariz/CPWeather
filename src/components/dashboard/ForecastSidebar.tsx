@@ -7,7 +7,6 @@ import {
 } from '../../i18n/dashboard.ts'
 import { forecastSummaryClasses, rainChanceClasses } from './display.ts'
 import { WeatherIcon } from './icons.tsx'
-import { SemanticHighlight } from './SemanticHighlight.tsx'
 
 type ForecastSidebarProps = {
   selectedLocationLabel: string
@@ -53,9 +52,9 @@ export function ForecastSidebar({
             onBlur={() => onActiveForecastIndexChange(null)}
             className={`forecast-sidebar-item p-4 transition ${
               activeForecastIndex === index
-                ? 'border-sky-400 bg-sky-50'
+                ? 'border-sky-300/80 bg-sky-50/70'
                 : index === 0
-                  ? 'border-sky-300 bg-sky-50'
+                  ? 'border-sky-200/80 bg-sky-50/55'
                   : ''
             }`}
           >
@@ -87,7 +86,7 @@ export function ForecastSidebar({
 
             <div className="mt-4 flex items-start justify-between gap-3 text-sm text-slate-600">
               <span className={`min-w-0 flex-1 font-semibold leading-6 ${forecastSummaryClasses(day.summary, day.rainChance)}`}>
-                <SemanticHighlight>{day.summary}</SemanticHighlight>
+                {day.summary}
               </span>
               <span className={`surface-chip shrink-0 border px-2 py-1 text-xs font-bold ${rainChanceClasses(day.rainChance)}`}>
                 {day.rainChance}%
@@ -98,10 +97,10 @@ export function ForecastSidebar({
               <div
                 className={`h-full rounded-full ${
                   day.rainChance >= 65
-                    ? 'bg-rose-500'
+                    ? 'bg-rose-500/80'
                     : day.rainChance >= 45
-                      ? 'bg-amber-500'
-                      : 'bg-emerald-500'
+                      ? 'bg-amber-500/80'
+                      : 'bg-teal-500/80'
                 }`}
                 style={{ width: `${Math.min(day.rainChance, 100)}%` }}
               />

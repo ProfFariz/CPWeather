@@ -125,7 +125,7 @@ a {
   display: inline-flex;
   align-items: center;
   border-radius: 0.65rem;
-  padding: 0.05rem 0.34rem;
+  padding: 0 0.24rem;
   font-weight: 800;
   line-height: 1.45;
   box-decoration-break: clone;
@@ -133,23 +133,23 @@ a {
 }
 
 .semantic-term-good {
-  background: rgba(16, 185, 129, 0.16);
-  color: #047857;
+  background: rgba(20, 184, 166, 0.1);
+  color: #0f766e;
 }
 
 .semantic-term-caution {
-  background: rgba(245, 158, 11, 0.18);
-  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
 }
 
 .semantic-term-danger {
-  background: rgba(244, 63, 94, 0.16);
+  background: rgba(225, 29, 72, 0.1);
   color: #be123c;
 }
 
 .semantic-term-info {
-  background: rgba(14, 165, 233, 0.14);
-  color: #0369a1;
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
 }
 
 .icon-button {
@@ -310,6 +310,76 @@ a {
   opacity: 0.86;
 }
 
+.brand-wordmark {
+  display: block;
+  overflow: visible;
+}
+
+.brand-wordmark-text {
+  fill: url(#brand-wordmark-text);
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.38);
+  stroke-width: 1.2;
+}
+
+.brand-wordmark-weather {
+  color: #0e7490;
+  transform-origin: 25px 26px;
+  animation: brand-wordmark-weather-float 7.2s ease-in-out infinite;
+}
+
+.brand-wordmark-sun {
+  fill: #fbbf24;
+  opacity: 0.92;
+  transform-origin: 18px 15px;
+  animation: brand-wordmark-sun-pulse 5.4s ease-in-out infinite;
+}
+
+.brand-wordmark-cloud {
+  fill: rgba(14, 116, 144, 0.18);
+  stroke: currentColor;
+  stroke-width: 2.8;
+  stroke-linejoin: round;
+}
+
+.brand-wordmark-rain {
+  fill: none;
+  stroke: #0e7490;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-dasharray: 6 7;
+  animation: brand-wordmark-rain-fall 1.9s ease-in-out infinite;
+}
+
+.brand-wordmark-rain:nth-of-type(2) {
+  animation-delay: 180ms;
+}
+
+.brand-wordmark-rain:nth-of-type(3) {
+  animation-delay: 360ms;
+}
+
+.brand-wordmark-sheen {
+  fill: url(#brand-wordmark-sheen);
+  mix-blend-mode: screen;
+  opacity: 0.36;
+  transform: skewX(-16deg);
+  animation: brand-wordmark-sheen-slide 7.8s ease-in-out infinite;
+}
+
+.brand-wordmark-underline {
+  fill: none;
+  stroke: rgba(14, 116, 144, 0.32);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 18 12;
+  animation: brand-wordmark-line-flow 6.5s linear infinite;
+}
+
 @keyframes brand-mark-aurora {
   to {
     transform: rotate(360deg);
@@ -373,6 +443,65 @@ a {
   50% {
     opacity: 1;
     transform: scale(1.04);
+  }
+}
+
+@keyframes brand-wordmark-weather-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-1.5px);
+  }
+}
+
+@keyframes brand-wordmark-sun-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.86;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes brand-wordmark-rain-fall {
+  0% {
+    opacity: 0.2;
+    stroke-dashoffset: 6;
+  }
+
+  45%,
+  70% {
+    opacity: 0.82;
+  }
+
+  100% {
+    opacity: 0.2;
+    stroke-dashoffset: -7;
+  }
+}
+
+@keyframes brand-wordmark-sheen-slide {
+  0%,
+  42% {
+    transform: translateX(0) skewX(-16deg);
+  }
+
+  58%,
+  100% {
+    transform: translateX(300px) skewX(-16deg);
+  }
+}
+
+@keyframes brand-wordmark-line-flow {
+  to {
+    stroke-dashoffset: -60;
   }
 }
 
@@ -441,11 +570,11 @@ a {
 }
 
 .header-location-option-active {
-  @apply border border-sky-200/85 text-slate-900;
-  background: linear-gradient(90deg, rgba(224, 242, 254, 0.98) 0%, rgba(255, 255, 255, 0.96) 100%);
+  @apply border border-sky-200/70 text-slate-900;
+  background: linear-gradient(90deg, rgba(240, 249, 255, 0.98) 0%, rgba(255, 255, 255, 0.96) 100%);
   transform: translateY(-2px);
   box-shadow:
-    0 14px 24px rgba(59, 130, 246, 0.14),
+    0 14px 24px rgba(77, 126, 185, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.34);
 }
 
@@ -465,7 +594,7 @@ a {
 }
 
 .header-location-current-badge {
-  @apply inline-flex shrink-0 items-center rounded-2xl border border-sky-200/80 bg-sky-500/14 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-800;
+  @apply inline-flex shrink-0 items-center rounded-2xl border border-sky-200/80 bg-sky-50/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-800;
 }
 
 .header-location-value-swap {
@@ -500,9 +629,9 @@ a {
 }
 
 .location-pill-active {
-  @apply border-sky-300/65 bg-sky-500 text-white;
+  @apply border-sky-300/65 bg-sky-600 text-white;
   box-shadow:
-    0 18px 32px rgba(59, 130, 246, 0.22),
+    0 18px 32px rgba(14, 116, 144, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
@@ -538,14 +667,9 @@ a {
 
 .hero-current-row {
   display: grid;
-  grid-template-columns: minmax(7.5rem, 10rem) minmax(0, 1fr);
+  grid-template-columns: minmax(11rem, 16rem) minmax(0, 1fr);
   align-items: center;
   gap: 1.25rem;
-}
-
-.hero-weather-signal {
-  width: clamp(7.5rem, 14vw, 10rem);
-  max-width: 100%;
 }
 
 .hero-temperature-block,
@@ -554,62 +678,16 @@ a {
 }
 
 .hero-temperature-block {
-  grid-column: 2;
-  grid-row: 1;
-  align-self: end;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  transform: translateY(-10px);
 }
 
 .hero-copy-block {
   grid-column: 2;
   grid-row: 2;
   max-width: 34rem;
-}
-
-.hero-current-row .hero-weather-signal {
-  grid-row: 1 / span 2;
-}
-
-.weather-signal-icon {
-  display: block;
-  height: auto;
-  overflow: visible;
-}
-
-.weather-signal-grid path,
-.weather-signal-sun path,
-.weather-signal-cloud path,
-.weather-signal-rain path,
-.weather-signal-route {
-  fill: none;
-  stroke: rgba(14, 116, 144, 0.28);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 4;
-}
-
-.weather-signal-sun circle {
-  fill: rgba(14, 165, 233, 0.22);
-  stroke: #0284c7;
-  stroke-width: 4;
-}
-
-.weather-signal-cloud path {
-  fill: rgba(255, 255, 255, 0.72);
-  stroke: #0284c7;
-}
-
-.weather-signal-rain path,
-.weather-signal-route {
-  stroke: #0284c7;
-  stroke-width: 5;
-}
-
-.weather-signal-icon-sun .weather-signal-cloud,
-.weather-signal-icon-sun .weather-signal-rain,
-.weather-signal-icon-cloud .weather-signal-sun,
-.weather-signal-icon-cloud .weather-signal-rain,
-.weather-signal-icon-rain .weather-signal-sun {
-  opacity: 0.18;
 }
 
 .temperature-display {
@@ -1037,6 +1115,11 @@ a {
   .brand-logo-cloud,
   .brand-logo-rain path,
   .brand-logo-signal,
+  .brand-wordmark-weather,
+  .brand-wordmark-sun,
+  .brand-wordmark-rain,
+  .brand-wordmark-sheen,
+  .brand-wordmark-underline,
   .temperature-display-orbit path,
   .temperature-display-sun,
   .temperature-display-cloud,
@@ -1087,17 +1170,14 @@ a {
 }
 
 .forecast-sidebar-item-active {
-  animation: forecast-active-glow 3.8s ease-in-out infinite;
   box-shadow:
-    0 0 0 1px rgba(56, 189, 248, 0.12),
-    0 24px 46px rgba(14, 165, 233, 0.22),
-    0 0 26px rgba(56, 189, 248, 0.2),
+    0 0 0 1px rgba(14, 116, 144, 0.12),
+    0 20px 38px rgba(77, 126, 185, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.34);
 }
 
 .forecast-sidebar-item-hovered {
-  background-image:
-    radial-gradient(circle at top right, rgba(125, 211, 252, 0.16), transparent 36%);
+  background-color: rgba(255, 255, 255, 0.44);
 }
 
 .forecast-sidebar-item-today {
@@ -1167,7 +1247,7 @@ a {
 
 @media (max-width: 1180px) {
   .hero-current-row {
-    grid-template-columns: minmax(6.5rem, 8rem) minmax(0, 1fr);
+    grid-template-columns: minmax(10rem, 15rem) minmax(0, 1fr);
   }
 
   .hero-copy-block {
@@ -1189,14 +1269,13 @@ a {
   }
 
   .hero-temperature-block,
-  .hero-copy-block,
-  .hero-current-row .hero-weather-signal {
+  .hero-copy-block {
     grid-column: 1;
     grid-row: auto;
   }
 
-  .hero-weather-signal {
-    width: 8rem;
+  .hero-temperature-block {
+    transform: none;
   }
 
   .temperature-display {

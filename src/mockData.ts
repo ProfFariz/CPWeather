@@ -485,21 +485,21 @@ export const dashboardMocks = {
 } satisfies Record<LocationKey, LocationSnapshot>
 
 export const severityClasses: Record<Severity, string> = {
-  Monitor: 'border-emerald-800/10 bg-emerald-900/5 text-emerald-950',
-  Watch: 'border-amber-900/15 bg-amber-100/80 text-amber-950',
-  Alert: 'border-rose-900/15 bg-rose-100/85 text-rose-950',
+  Monitor: 'border-teal-200/80 bg-teal-50/85 text-teal-800',
+  Watch: 'border-amber-200/80 bg-amber-50/85 text-amber-800',
+  Alert: 'border-rose-200/80 bg-rose-50/85 text-rose-800',
 }
 
 export const airBandClasses: Record<AirBand, string> = {
-  Good: 'bg-emerald-950 text-emerald-50',
-  Moderate: 'bg-amber-500 text-amber-950',
-  Poor: 'bg-rose-700 text-rose-50',
+  Good: 'border border-teal-200/80 bg-teal-50/85 text-teal-800',
+  Moderate: 'border border-amber-200/80 bg-amber-50/85 text-amber-800',
+  Poor: 'border border-rose-200/80 bg-rose-50/85 text-rose-800',
 }
 
 export const hikeClasses: Record<HikeVerdict, string> = {
-  Go: 'bg-emerald-50 text-emerald-950 ring-1 ring-emerald-900/10',
-  Caution: 'bg-amber-100 text-amber-950 ring-1 ring-amber-900/10',
-  Skip: 'bg-rose-100 text-rose-950 ring-1 ring-rose-900/10',
+  Go: 'border border-teal-200/80 bg-teal-50/85 text-teal-800',
+  Caution: 'border border-amber-200/80 bg-amber-50/85 text-amber-800',
+  Skip: 'border border-rose-200/80 bg-rose-50/85 text-rose-800',
 }
 
 export function getDashboardSnapshot(

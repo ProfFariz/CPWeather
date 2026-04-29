@@ -1,5 +1,6 @@
 import {
   BarElement,
+  BarController,
   CategoryScale,
   Chart as ChartJS,
   type ChartData,
@@ -7,6 +8,7 @@ import {
   Filler,
   Legend,
   LineElement,
+  LineController,
   LinearScale,
   PointElement,
   Tooltip,
@@ -19,10 +21,12 @@ import { formatForecastLabel } from './display.ts'
 import { ChartIcon } from './icons.tsx'
 
 ChartJS.register(
+  BarController,
   BarElement,
   CategoryScale,
   LinearScale,
   PointElement,
+  LineController,
   LineElement,
   Filler,
   Tooltip,

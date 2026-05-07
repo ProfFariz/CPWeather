@@ -56,30 +56,30 @@ export function DashboardHero({
       : snapshot.warnings[0]?.severity ?? null
   const warningCardClasses =
     strongestWarningSeverity === 'Alert'
-      ? 'border-rose-200/80 bg-rose-50/70'
+      ? 'border-rose-200/70 bg-rose-50/50'
       : strongestWarningSeverity === 'Watch'
-        ? 'border-amber-200/80 bg-amber-50/70'
+        ? 'border-amber-200/70 bg-amber-50/50'
         : ''
   const warningAccentClasses =
     strongestWarningSeverity === 'Alert'
       ? 'bg-rose-500'
       : strongestWarningSeverity === 'Watch'
         ? 'bg-amber-500'
-        : 'bg-sky-500'
+        : 'bg-emerald-500'
   const warningChipClasses =
     strongestWarningSeverity === 'Alert'
-      ? 'border-rose-200/80 bg-rose-50/85 text-rose-800'
+      ? 'border-rose-200/70 bg-rose-50/70 text-rose-800'
       : strongestWarningSeverity === 'Watch'
-        ? 'border-amber-200/80 bg-amber-50/85 text-amber-800'
-        : 'border-sky-200/80 bg-sky-50/85 text-sky-800'
+        ? 'border-amber-200/70 bg-amber-50/70 text-amber-800'
+        : 'border-emerald-200/70 bg-emerald-50/70 text-emerald-800'
   const warningSummaryTextClasses =
     strongestWarningSeverity === 'Alert'
-      ? 'text-rose-900'
+      ? 'text-rose-800'
       : strongestWarningSeverity === 'Watch'
-        ? 'text-amber-900'
+        ? 'text-amber-800'
         : snapshot.warnings.length === 0
-          ? 'text-teal-800'
-          : 'text-sky-900'
+          ? 'text-emerald-700'
+          : 'text-emerald-800'
   const warningChipLabel = strongestWarningSeverity
     ? translateSeverity(strongestWarningSeverity, locale)
     : copy.hero.clearState
@@ -87,14 +87,14 @@ export function DashboardHero({
   const humidity = today?.humidity ?? 0
 
   return (
-    <section className="command-hero surface-panel min-w-0 overflow-hidden p-5 sm:p-8">
+    <section className="command-hero surface-panel min-w-0 overflow-hidden p-6 sm:p-10">
       <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_17rem] md:items-start lg:gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="surface-chip text-xs font-semibold uppercase tracking-[0.28em] text-sky-700">
+            <span className="surface-chip text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">
               {selectedLocationLabel}, Perak
             </span>
-            <span className="surface-chip text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">
+            <span className="surface-chip text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600/70">
               {formatHeroTimestamp(meta.servedAt, locale)}
             </span>
           </div>
@@ -104,16 +104,16 @@ export function DashboardHero({
               key={`${selectedLocationLabel}-${currentSummary}-${heroTemperature}`}
               className="min-w-0"
             >
-              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-sky-700/80">
+              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-600/80">
                 {weatherAccent(currentSummary, locale)}
               </p>
               <div className="hero-current-row mt-3 flex flex-col gap-5 sm:flex-row sm:items-start">
                 <div className="hero-temperature-block shrink-0">
-                  <TemperatureDisplay value={heroTemperature} className="text-sky-700" />
+                  <TemperatureDisplay value={heroTemperature} className="text-emerald-600" />
                 </div>
                 <div className="hero-copy-block min-w-0 pt-0 sm:pt-4">
-                  <p className="text-lg font-semibold text-slate-900">{currentSummary}</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                  <p className="text-lg font-semibold text-emerald-900">{currentSummary}</p>
+                  <p className="mt-2 text-sm leading-7 text-emerald-800/70">
                     {snapshot.overview}
                   </p>
                 </div>
@@ -134,15 +134,15 @@ export function DashboardHero({
         </div>
 
         <div className="hike-card surface-section min-w-0 self-start p-4 sm:p-5">
-          <div className="flex items-start gap-3 text-sky-600">
+          <div className="flex items-start gap-3 text-emerald-600">
             <span className="icon-pill shrink-0">
               <TrailIcon />
             </span>
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-700/85">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-600/80">
                 {copy.hero.hikingOutlook}
               </p>
-              <h2 className="mt-2 break-words text-2xl font-semibold tracking-tight text-slate-900">
+              <h2 className="mt-2 break-words text-2xl font-semibold tracking-tight text-emerald-900">
                 {snapshot.hikeTip.target}
               </h2>
             </div>
@@ -154,15 +154,15 @@ export function DashboardHero({
             >
               {translateHikeVerdict(snapshot.hikeTip.verdict, locale)}
             </span>
-            <span className="text-sm font-semibold text-slate-500">
+            <span className="text-sm font-semibold text-emerald-700/60">
               {copy.hero.confidence(snapshot.hikeTip.confidence)}
             </span>
           </div>
 
-          <p className="mt-5 text-lg font-semibold text-slate-900">
+          <p className="mt-5 text-lg font-semibold text-emerald-900">
             {snapshot.hikeTip.title}
           </p>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
+          <p className="mt-3 text-sm leading-7 text-emerald-800/70">
             {snapshot.hikeTip.reason}
           </p>
         </div>
@@ -172,7 +172,7 @@ export function DashboardHero({
         <article className="status-widget air-widget surface-widget min-w-0 p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-sky-700/85">
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-emerald-600/80">
                 {copy.hero.airQuality}
               </p>
               <p className={`mt-3 text-3xl font-semibold ${airQualityMetricClasses(snapshot.airBand)}`}>
@@ -188,7 +188,7 @@ export function DashboardHero({
           >
             {translateAirBand(snapshot.airBand, locale)}
           </span>
-          <p className="mt-4 text-sm leading-7 text-slate-600">
+          <p className="mt-4 text-sm leading-7 text-emerald-800/70">
             {statusCopy(snapshot.airBand, locale)}
           </p>
         </article>
@@ -196,7 +196,7 @@ export function DashboardHero({
         <article className="status-widget rain-widget surface-widget min-w-0 p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-sky-700/85">
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-emerald-600/80">
                 {copy.hero.rainWindow}
               </p>
               <p className={`mt-3 text-xl font-semibold sm:text-2xl ${forecastSummaryClasses(snapshot.nextRainWindow, rainChance)}`}>
@@ -207,7 +207,7 @@ export function DashboardHero({
               <DropIcon />
             </span>
           </div>
-          <p className="mt-4 text-sm leading-7 text-slate-600">
+          <p className="mt-4 text-sm leading-7 text-emerald-800/70">
             {copy.hero.rainNarrative(rainChance, humidity)}
             <span className={`surface-chip ml-1 inline-flex border px-2 py-0.5 text-xs font-bold ${rainChanceClasses(rainChance)}`}>
               {rainChance}%
@@ -219,7 +219,7 @@ export function DashboardHero({
           <div className={`mb-4 h-1.5 rounded-full ${warningAccentClasses}`} />
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-sky-700/85">
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-emerald-600/80">
                 {copy.hero.warnings}
               </p>
               <p className={`mt-3 text-2xl font-semibold ${warningSummaryTextClasses}`}>
@@ -235,7 +235,7 @@ export function DashboardHero({
           >
             {warningChipLabel}
           </span>
-          <p className="mt-4 text-sm leading-7 text-slate-600">
+          <p className="mt-4 text-sm leading-7 text-emerald-800/70">
             {snapshot.warnings[0]?.title ?? copy.hero.noWarning}
           </p>
         </article>

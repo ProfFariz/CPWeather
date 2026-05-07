@@ -49,63 +49,63 @@ export function weatherAccent(summary: string, locale: AppLocale) {
 
 export function cacheStatusClasses(status: ClientCacheStatus) {
   if (status === 'fresh') {
-    return 'border-sky-200/55 bg-sky-50/70 text-sky-700'
+    return 'border-emerald-200/60 bg-emerald-50/70 text-emerald-700'
   }
 
   if (status === 'network') {
-    return 'border-sky-200/55 bg-sky-50/70 text-sky-700'
+    return 'border-emerald-200/60 bg-emerald-50/70 text-emerald-700'
   }
 
   if (status === 'stale') {
     return 'border-amber-200/60 bg-amber-50/70 text-amber-800'
   }
 
-  return 'border-white/40 bg-white/45 text-slate-600'
+  return 'border-white/60 bg-white/60 text-emerald-600'
 }
 
 export function hikeCueClasses(tone: HikeCueTone) {
   if (tone === 'positive') {
-    return 'border-teal-200/70 bg-teal-50/75 text-teal-800'
+    return 'border-emerald-200/70 bg-emerald-50/70 text-emerald-800'
   }
 
   if (tone === 'caution') {
-    return 'border-amber-200/70 bg-amber-50/75 text-amber-800'
+    return 'border-amber-200/70 bg-amber-50/70 text-amber-800'
   }
 
   if (tone === 'danger') {
-    return 'border-rose-200/70 bg-rose-50/75 text-rose-800'
+    return 'border-rose-200/70 bg-rose-50/70 text-rose-800'
   }
 
-  return 'border-white/45 bg-white/45 text-slate-600'
+  return 'border-white/60 bg-white/60 text-emerald-600'
 }
 
 export function warningToneClasses(severity: Severity) {
   if (severity === 'Alert') {
-    return 'border-rose-200/70 bg-rose-50/75 text-rose-900'
+    return 'border-rose-200/60 bg-rose-50/50 text-rose-800'
   }
 
   if (severity === 'Watch') {
-    return 'border-amber-200/70 bg-amber-50/75 text-amber-900'
+    return 'border-amber-200/60 bg-amber-50/50 text-amber-800'
   }
 
-  return 'border-sky-200/70 bg-sky-50/70 text-sky-800'
+  return 'border-emerald-200/60 bg-emerald-50/50 text-emerald-800'
 }
 
 export function rainChanceClasses(rainChance: number) {
   if (rainChance >= 65) {
-    return 'border-rose-200/80 bg-rose-50/85 text-rose-800'
+    return 'border-rose-200/70 bg-rose-50/70 text-rose-800'
   }
 
   if (rainChance >= 45) {
-    return 'border-amber-200/80 bg-amber-50/85 text-amber-800'
+    return 'border-amber-200/70 bg-amber-50/70 text-amber-800'
   }
 
-  return 'border-teal-200/80 bg-teal-50/85 text-teal-800'
+  return 'border-emerald-200/70 bg-emerald-50/70 text-emerald-800'
 }
 
 export function airQualityMetricClasses(airBand: AirBand) {
   if (airBand === 'Good') {
-    return 'text-teal-700'
+    return 'text-emerald-700'
   }
 
   if (airBand === 'Moderate') {
@@ -123,7 +123,7 @@ export function forecastSummaryClasses(summary: string, rainChance: number) {
     normalizedSummary.includes('storm') ||
     normalizedSummary.includes('thunder')
   ) {
-    return 'text-rose-800'
+    return 'text-rose-700'
   }
 
   if (
@@ -133,10 +133,10 @@ export function forecastSummaryClasses(summary: string, rainChance: number) {
     normalizedSummary.includes('shower') ||
     normalizedSummary.includes('mist')
   ) {
-    return 'text-amber-800'
+    return 'text-amber-700'
   }
 
-  return 'text-teal-800'
+  return 'text-emerald-700'
 }
 
 export function resolveCurrentTemp(payload: DashboardPayload) {

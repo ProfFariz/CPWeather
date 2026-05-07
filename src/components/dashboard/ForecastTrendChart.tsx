@@ -53,7 +53,7 @@ export function ForecastTrendChart({
   const copy = getDashboardCopy(locale)
   const highlightedIndex = activeForecastIndex ?? 0
   const rainBarColor = (rainChance: number, index: number) => {
-    const opacity = index === highlightedIndex ? 0.42 : index === 0 ? 0.3 : 0.2
+    const opacity = index === highlightedIndex ? 0.4 : index === 0 ? 0.28 : 0.18
 
     if (rainChance >= 65) {
       return `rgba(244, 63, 94, ${opacity})`
@@ -72,7 +72,7 @@ export function ForecastTrendChart({
     data: forecastDays.map((day) => day.rainChance),
     backgroundColor: forecastDays.map((day, index) => rainBarColor(day.rainChance, index)),
     borderColor: forecastDays.map((day) =>
-      day.rainChance >= 65 ? '#e11d48' : day.rainChance >= 45 ? '#d97706' : '#059669',
+      day.rainChance >= 65 ? '#f43f5e' : day.rainChance >= 45 ? '#f59e0b' : '#10b981',
     ),
     borderRadius: 999,
     borderSkipped: false,
@@ -85,10 +85,10 @@ export function ForecastTrendChart({
     type: 'line',
     label: copy.chart.datasets.high,
     data: forecastDays.map((day) => day.high),
-    borderColor: '#2563eb',
-    backgroundColor: 'rgba(37, 99, 235, 0.14)',
+    borderColor: '#059669',
+    backgroundColor: 'rgba(5, 150, 105, 0.1)',
     pointBackgroundColor: forecastDays.map((_, index) =>
-      index === highlightedIndex ? '#0f172a' : index === 0 ? '#1d4ed8' : '#2563eb',
+      index === highlightedIndex ? '#064e3b' : index === 0 ? '#059669' : '#10b981',
     ),
     pointBorderColor: '#ffffff',
     pointBorderWidth: 2,
@@ -106,10 +106,10 @@ export function ForecastTrendChart({
     type: 'line',
     label: copy.chart.datasets.low,
     data: forecastDays.map((day) => day.low),
-    borderColor: '#60a5fa',
-    backgroundColor: 'rgba(96, 165, 250, 0.08)',
+    borderColor: '#34d399',
+    backgroundColor: 'rgba(52, 211, 153, 0.06)',
     pointBackgroundColor: forecastDays.map((_, index) =>
-      index === highlightedIndex ? '#0ea5e9' : index === 0 ? '#38bdf8' : '#60a5fa',
+      index === highlightedIndex ? '#064e3b' : index === 0 ? '#34d399' : '#6ee7b7',
     ),
     pointBorderColor: '#ffffff',
     pointBorderWidth: 2,
@@ -139,7 +139,7 @@ export function ForecastTrendChart({
     maintainAspectRatio: false,
     locale: locale === 'bm' ? 'ms-MY' : 'en-US',
     animation: {
-      duration: 180,
+      duration: 220,
       easing: 'easeOutCubic',
     },
     interaction: {
@@ -157,7 +157,7 @@ export function ForecastTrendChart({
         labels: {
           usePointStyle: false,
           boxWidth: 14,
-          color: '#334155',
+          color: '#065f46',
           font: {
             family: 'Manrope',
             size: 12,
@@ -166,9 +166,9 @@ export function ForecastTrendChart({
         },
       },
       tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-        titleColor: '#f8fafc',
-        bodyColor: '#e2e8f0',
+        backgroundColor: 'rgba(6, 78, 59, 0.95)',
+        titleColor: '#ecfdf5',
+        bodyColor: '#d1fae5',
         padding: 12,
         displayColors: true,
         callbacks: {
@@ -215,7 +215,7 @@ export function ForecastTrendChart({
         title: {
           display: true,
           text: copy.chart.axes.day,
-          color: '#64748b',
+          color: '#047857',
           font: {
             family: 'Manrope',
             size: 12,
@@ -230,7 +230,7 @@ export function ForecastTrendChart({
             },
           },
           color(context) {
-            return context.index === highlightedIndex ? '#0f172a' : '#64748b'
+            return context.index === highlightedIndex ? '#064e3b' : '#047857'
           },
         },
       },
@@ -240,7 +240,7 @@ export function ForecastTrendChart({
         title: {
           display: true,
           text: copy.chart.axes.temp,
-          color: '#64748b',
+          color: '#047857',
           font: {
             family: 'Manrope',
             size: 12,
@@ -248,7 +248,7 @@ export function ForecastTrendChart({
           },
         },
         ticks: {
-          color: '#64748b',
+          color: '#047857',
           callback: (value) => `${value}\u00B0`,
           font: {
             family: 'Manrope',
@@ -256,7 +256,7 @@ export function ForecastTrendChart({
           },
         },
         grid: {
-          color: 'rgba(148, 163, 184, 0.18)',
+          color: 'rgba(5, 150, 105, 0.1)',
         },
         border: {
           display: false,
@@ -270,7 +270,7 @@ export function ForecastTrendChart({
         title: {
           display: true,
           text: copy.chart.axes.rain,
-          color: '#64748b',
+          color: '#047857',
           font: {
             family: 'Manrope',
             size: 12,
@@ -278,7 +278,7 @@ export function ForecastTrendChart({
           },
         },
         ticks: {
-          color: '#64748b',
+          color: '#047857',
           callback: (value) => `${value}%`,
           font: {
             family: 'Manrope',
@@ -299,28 +299,28 @@ export function ForecastTrendChart({
     <article className="analytics-panel surface-panel min-w-0 p-5 sm:p-7">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="flex items-center gap-3 text-sky-600">
+          <div className="flex items-center gap-3 text-emerald-600">
             <span className="icon-pill">
               <ChartIcon />
             </span>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-700/85">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-600/80">
                 {copy.chart.eyebrow}
               </p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-emerald-900">
                 {copy.chart.title(selectedLocationLabel)}
               </h2>
             </div>
           </div>
         </div>
-        <p className="max-w-sm text-sm leading-7 text-slate-600">
+        <p className="max-w-sm text-sm leading-7 text-emerald-800/70">
           {copy.chart.description}
         </p>
       </div>
 
       <div
         key={`${selectedLocationLabel}-${locale}`}
-        className="chart-canvas-frame mt-6 h-[260px] rounded-2xl border border-slate-200 bg-white p-3 sm:h-[320px] sm:p-5"
+        className="chart-canvas-frame mt-6 h-[260px] rounded-2xl border border-emerald-100 bg-white/60 p-3 sm:h-[320px] sm:p-5"
         onMouseLeave={() => onActiveForecastIndexChange(null)}
       >
         <Chart<'bar' | 'line'> type="bar" data={forecastChartData} options={chartOptions} />

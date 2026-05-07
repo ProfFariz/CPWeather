@@ -89,7 +89,7 @@ export function DashboardHeader({
             <h1 className="min-w-0" aria-label={copy.header.brand}>
               <BrandWordmark className="h-[2.55rem] w-[12.75rem] max-w-full" />
             </h1>
-            <p className="truncate text-base font-medium text-slate-500">
+            <p className="truncate text-base font-medium text-emerald-700/70">
               {copy.header.subtitle}
             </p>
           </div>
@@ -117,16 +117,16 @@ export function DashboardHeader({
                 key={selectedLocationOption?.key ?? selectedLocation}
                 className="min-w-0 flex-1 text-left"
               >
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-600/70">
                   {copy.header.locationLabel}
                 </span>
-                <span className="mt-1 block truncate text-xl font-semibold tracking-tight text-slate-900">
+                <span className="mt-1 block truncate text-xl font-semibold tracking-tight text-emerald-900">
                   {selectedLocationOption?.label ?? selectedLocation}
                 </span>
               </span>
               <span
-                className={`shrink-0 text-slate-400 transition duration-200 ${
-                  isLocationMenuOpen ? 'rotate-180 text-sky-600' : ''
+                className={`shrink-0 transition duration-200 ${
+                  isLocationMenuOpen ? 'rotate-180 text-emerald-600' : 'text-emerald-400'
                 }`}
               >
                 <ChevronDownIcon />
@@ -139,11 +139,11 @@ export function DashboardHeader({
                 role="listbox"
                 aria-label={copy.header.locationMenuTitle}
               >
-                <div className="border-b border-white/45 px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700/85">
+                <div className="border-b border-emerald-100 px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-600/80">
                     {copy.header.locationMenuTitle}
                   </p>
-                  <p className="mt-1 text-xs font-medium text-slate-500">
+                  <p className="mt-1 text-xs font-medium text-emerald-700/60">
                     {copy.header.subtitle}
                   </p>
                 </div>
@@ -179,10 +179,10 @@ export function DashboardHeader({
                         </span>
 
                         <span className="min-w-0 flex-1 text-left">
-                          <span className="block truncate text-base font-semibold text-slate-900">
+                          <span className="block truncate text-base font-semibold">
                             {location.label}
                           </span>
-                          <span className="mt-0.5 block text-xs font-medium text-slate-500">
+                          <span className="mt-0.5 block text-xs font-medium text-emerald-700/50">
                             {copy.header.subtitle}
                           </span>
                         </span>
@@ -223,14 +223,14 @@ export function DashboardHeader({
 
           <div className="surface-chip justify-between gap-4 px-4 py-3 sm:min-w-[13rem]">
             <div className="flex items-center gap-3">
-              <span className="text-slate-500">
+              <span className="text-emerald-500">
                 <ClockIcon />
               </span>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600/70">
                   {copy.header.updated}
                 </p>
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="text-sm font-semibold text-emerald-900">
                   {formatHeaderUpdatedTime(servedAt, locale)}
                 </p>
               </div>

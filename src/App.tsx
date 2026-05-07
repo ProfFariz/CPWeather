@@ -17,6 +17,7 @@ import { DashboardHeader } from './components/dashboard/DashboardHeader.tsx'
 import { DashboardHero } from './components/dashboard/DashboardHero.tsx'
 import { DashboardInitialErrorState } from './components/dashboard/DashboardInitialErrorState.tsx'
 import { DashboardLoadingState } from './components/dashboard/DashboardLoadingState.tsx'
+import { CursorGlow } from './components/dashboard/CursorGlow.tsx'
 import { ForecastSidebar } from './components/dashboard/ForecastSidebar.tsx'
 import { ForecastTrendChart } from './components/dashboard/ForecastTrendChart.tsx'
 import { ShaderGradientBackground } from './components/dashboard/ShaderGradientBackground.tsx'
@@ -47,6 +48,7 @@ function App() {
     return (
       <>
         <ShaderGradientBackground />
+        <CursorGlow />
         <DashboardLoadingState locale={locale} />
       </>
     )
@@ -56,6 +58,7 @@ function App() {
     return (
       <>
         <ShaderGradientBackground />
+        <CursorGlow />
         <DashboardInitialErrorState locale={locale} error={error} onRetry={refresh} />
       </>
     )
@@ -69,7 +72,8 @@ function App() {
   return (
     <div className="page-shell">
       <ShaderGradientBackground />
-      <div className="page-grid mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+      <CursorGlow />
+      <div className="page-grid mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-12 lg:py-14">
         <DashboardHeader
           locale={locale}
           onLocaleChange={setLocale}
@@ -87,12 +91,12 @@ function App() {
         />
 
         {error ? (
-          <div className="glass-panel mb-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="glass-panel mb-8 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-700">
                 {copy.banner.lastFetchWarning}
               </p>
-              <p className="mt-2 text-sm font-medium text-slate-700">
+              <p className="mt-2 text-sm font-medium text-emerald-800">
                 {error}
               </p>
             </div>
@@ -102,7 +106,7 @@ function App() {
           </div>
         ) : null}
 
-        <main className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <main className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
           <DashboardHero
             payload={payload}
             selectedLocationLabel={selectedLocationLabel}
@@ -117,7 +121,7 @@ function App() {
           />
         </main>
 
-        <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.18fr)_0.82fr]">
+        <section className="mt-8 grid gap-8 xl:grid-cols-[minmax(0,1.18fr)_0.82fr]">
           <ForecastTrendChart
             selectedLocationLabel={selectedLocationLabel}
             forecastDays={forecastDays}
@@ -132,7 +136,7 @@ function App() {
           />
         </section>
 
-        <footer className="mt-6 px-4 text-center text-xs font-semibold uppercase leading-6 tracking-[0.22em] text-sky-700/75">
+        <footer className="mt-8 px-4 text-center text-xs font-semibold uppercase leading-6 tracking-[0.22em] text-emerald-700/60">
           {copy.footer.servedAt} {formatFooterTime(payload.meta.servedAt, locale)} -{' '}
           {copy.footer.apiCacheTtl} {payload.meta.cacheTtlMinutes} {copy.common.minutes} -{' '}
           {copy.footer.localCache} {DASHBOARD_CACHE_TTL_MINUTES} {copy.common.minutes}

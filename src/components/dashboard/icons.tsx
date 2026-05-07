@@ -77,8 +77,8 @@ export function BrandWordmark({ className = '' }: IconProps) {
     >
       <defs>
         <linearGradient id="brand-wordmark-text" x1="0" y1="0" x2="248" y2="0">
-          <stop offset="0%" stopColor="#0f172a" />
-          <stop offset="48%" stopColor="#0e7490" />
+          <stop offset="0%" stopColor="#064e3b" />
+          <stop offset="48%" stopColor="#059669" />
           <stop offset="100%" stopColor="#075985" />
         </linearGradient>
         <linearGradient id="brand-wordmark-sheen" x1="-40" y1="0" x2="48" y2="0">

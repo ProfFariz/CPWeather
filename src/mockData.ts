@@ -1,4 +1,4 @@
-import {
+﻿import {
   defaultLocationKey,
   type DashboardLocale,
   locations,
@@ -485,21 +485,21 @@ export const dashboardMocks = {
 } satisfies Record<LocationKey, LocationSnapshot>
 
 export const severityClasses: Record<Severity, string> = {
-  Monitor: 'border-teal-200/80 bg-teal-50/85 text-teal-800',
-  Watch: 'border-amber-200/80 bg-amber-50/85 text-amber-800',
-  Alert: 'border-rose-200/80 bg-rose-50/85 text-rose-800',
+  Monitor: 'border-emerald-200/70 bg-emerald-50/70 text-emerald-800',
+  Watch: 'border-amber-400/25 bg-amber-500/[0.10] text-amber-200',
+  Alert: 'border-rose-400/25 bg-rose-500/[0.10] text-rose-200',
 }
 
 export const airBandClasses: Record<AirBand, string> = {
   Good: 'border border-teal-200/80 bg-teal-50/85 text-teal-800',
-  Moderate: 'border border-amber-200/80 bg-amber-50/85 text-amber-800',
-  Poor: 'border border-rose-200/80 bg-rose-50/85 text-rose-800',
+  Moderate: 'border border-amber-200/70 bg-amber-50/70 text-amber-800',
+  Poor: 'border border-rose-200/70 bg-rose-50/70 text-rose-800',
 }
 
 export const hikeClasses: Record<HikeVerdict, string> = {
   Go: 'border border-teal-200/80 bg-teal-50/85 text-teal-800',
   Caution: 'border border-amber-200/80 bg-amber-50/85 text-amber-800',
-  Skip: 'border border-rose-200/80 bg-rose-50/85 text-rose-800',
+  Skip: 'border border-rose-400/25 bg-rose-500/[0.10] text-rose-200',
 }
 
 export function getDashboardSnapshot(

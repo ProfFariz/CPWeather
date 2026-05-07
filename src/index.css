@@ -538,14 +538,9 @@ a {
 
 .hero-current-row {
   display: grid;
-  grid-template-columns: minmax(7.5rem, 10rem) minmax(0, 1fr);
+  grid-template-columns: minmax(11rem, 16rem) minmax(0, 1fr);
   align-items: center;
   gap: 1.25rem;
-}
-
-.hero-weather-signal {
-  width: clamp(7.5rem, 14vw, 10rem);
-  max-width: 100%;
 }
 
 .hero-temperature-block,
@@ -554,62 +549,16 @@ a {
 }
 
 .hero-temperature-block {
-  grid-column: 2;
-  grid-row: 1;
-  align-self: end;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  transform: translateY(-10px);
 }
 
 .hero-copy-block {
   grid-column: 2;
   grid-row: 2;
   max-width: 34rem;
-}
-
-.hero-current-row .hero-weather-signal {
-  grid-row: 1 / span 2;
-}
-
-.weather-signal-icon {
-  display: block;
-  height: auto;
-  overflow: visible;
-}
-
-.weather-signal-grid path,
-.weather-signal-sun path,
-.weather-signal-cloud path,
-.weather-signal-rain path,
-.weather-signal-route {
-  fill: none;
-  stroke: rgba(14, 116, 144, 0.28);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 4;
-}
-
-.weather-signal-sun circle {
-  fill: rgba(14, 165, 233, 0.22);
-  stroke: #0284c7;
-  stroke-width: 4;
-}
-
-.weather-signal-cloud path {
-  fill: rgba(255, 255, 255, 0.72);
-  stroke: #0284c7;
-}
-
-.weather-signal-rain path,
-.weather-signal-route {
-  stroke: #0284c7;
-  stroke-width: 5;
-}
-
-.weather-signal-icon-sun .weather-signal-cloud,
-.weather-signal-icon-sun .weather-signal-rain,
-.weather-signal-icon-cloud .weather-signal-sun,
-.weather-signal-icon-cloud .weather-signal-rain,
-.weather-signal-icon-rain .weather-signal-sun {
-  opacity: 0.18;
 }
 
 .temperature-display {
@@ -1167,7 +1116,7 @@ a {
 
 @media (max-width: 1180px) {
   .hero-current-row {
-    grid-template-columns: minmax(6.5rem, 8rem) minmax(0, 1fr);
+    grid-template-columns: minmax(10rem, 15rem) minmax(0, 1fr);
   }
 
   .hero-copy-block {
@@ -1189,14 +1138,13 @@ a {
   }
 
   .hero-temperature-block,
-  .hero-copy-block,
-  .hero-current-row .hero-weather-signal {
+  .hero-copy-block {
     grid-column: 1;
     grid-row: auto;
   }
 
-  .hero-weather-signal {
-    width: 8rem;
+  .hero-temperature-block {
+    transform: none;
   }
 
   .temperature-display {

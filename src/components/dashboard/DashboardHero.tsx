@@ -29,7 +29,6 @@ import {
 } from './icons.tsx'
 import { SemanticHighlight } from './SemanticHighlight.tsx'
 import { TemperatureDisplay } from './TemperatureDisplay.tsx'
-import { WeatherSignalIcon } from './WeatherSignalIcon.tsx'
 
 type DashboardHeroProps = {
   payload: DashboardPayload
@@ -109,10 +108,6 @@ export function DashboardHero({
                 <SemanticHighlight>{weatherAccent(currentSummary, locale)}</SemanticHighlight>
               </p>
               <div className="hero-current-row mt-3 flex flex-col gap-5 sm:flex-row sm:items-start">
-                <WeatherSignalIcon
-                  className="hero-weather-signal shrink-0"
-                  summary={currentSummary}
-                />
                 <div className="hero-temperature-block shrink-0">
                   <TemperatureDisplay value={heroTemperature} className="text-sky-700" />
                 </div>

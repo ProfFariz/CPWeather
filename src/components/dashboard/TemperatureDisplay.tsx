@@ -17,6 +17,14 @@ export function TemperatureDisplay({ value, className = '' }: TemperatureDisplay
       role="img"
       aria-labelledby={titleId}
     >
+      <style>{`
+        @media (min-width: 1024px) {
+          /* Move the badge up a bit on desktop to align higher */
+          .temperature-display {
+            transform: translateY(-20px);
+          }
+        }
+      `}</style>
       <title id={titleId}>{roundedValue} degrees Celsius</title>
 
       <g className="temperature-display-orbit">

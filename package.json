@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "deploy:live": "pnpm build && wrangler deploy",
+    "preview:live": "pnpm build && wrangler dev",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",

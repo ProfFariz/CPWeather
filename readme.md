@@ -260,6 +260,27 @@ pnpm test
 pnpm build
 ```
 
+### Live Hosting (Wrangler)
+
+Login and set your production secret:
+
+```powershell
+pnpm wrangler login
+pnpm wrangler secret put OPENWEATHER_API_KEY
+```
+
+Preview locally using the same worker + assets routing:
+
+```powershell
+pnpm preview:live
+```
+
+Deploy to live Cloudflare Workers hosting:
+
+```powershell
+pnpm deploy:live
+```
+
 ## Environment Variables
 
 Create a local env file:
@@ -309,7 +330,7 @@ The UI also shows cue chips so the user can understand why that verdict was chos
 
 ## What Is Still Missing
 
-- final Vercel deployment setup
+- Cloudflare dashboard polish (custom domain + route rules)
 - mobile QA and cross-browser QA
 - README screenshots and provider attribution polish
 - optional stretch features:
@@ -320,9 +341,9 @@ The UI also shows cue chips so the user can understand why that verdict was chos
 ## Recommended Next Order
 
 1. Test the full dashboard carefully on phone and desktop.
-2. Deploy to Vercel and set production env vars.
+2. Deploy with Wrangler and set production secrets.
 3. Add screenshots and attribution.
-4. Deploy to Vercel and verify production env vars plus live API behavior.
+4. Verify live Cloudflare deployment behavior and API fallback paths.
 5. Only after the MVP is stable, decide on Supabase, i18n, and PWA.
 
 ## Things Not To Forget

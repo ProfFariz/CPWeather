@@ -7,7 +7,6 @@ import {
 } from '../../i18n/dashboard.ts'
 import { warningToneClasses } from './display.ts'
 import { AlertIcon } from './icons.tsx'
-import { SemanticHighlight } from './SemanticHighlight.tsx'
 
 type WarningFeedProps = {
   warnings: WarningItem[]
@@ -29,12 +28,12 @@ export function WarningFeed({
       : warnings[0]?.severity ?? null
   const headerChipClasses =
     strongestSeverity === 'Alert'
-      ? 'border-rose-300/70 bg-rose-500/16 text-rose-800'
+      ? 'border-rose-200/80 bg-rose-50/85 text-rose-800'
       : strongestSeverity === 'Watch'
-        ? 'border-amber-300/70 bg-amber-400/16 text-amber-800'
+        ? 'border-amber-200/80 bg-amber-50/85 text-amber-800'
         : warnings.length === 0
-          ? 'border-emerald-200/80 bg-emerald-500/14 text-emerald-800'
-          : 'border-sky-200/80 bg-sky-500/14 text-sky-800'
+          ? 'border-teal-200/80 bg-teal-50/85 text-teal-800'
+          : 'border-sky-200/80 bg-sky-50/85 text-sky-800'
 
   return (
     <article className="warning-feed-panel surface-panel min-w-0 p-5 sm:p-7">
@@ -64,11 +63,11 @@ export function WarningFeed({
       <div className="mt-6 space-y-3">
         {warnings.length === 0 ? (
           <div className="forecast-sidebar-item">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-700">
-              <SemanticHighlight>{copy.warnings.clearTitle}</SemanticHighlight>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-teal-700">
+              {copy.warnings.clearTitle}
             </p>
             <p className="mt-3 text-sm leading-7 text-slate-600">
-              <SemanticHighlight>{copy.warnings.clearBody(selectedLocationLabel)}</SemanticHighlight>
+              {copy.warnings.clearBody(selectedLocationLabel)}
             </p>
           </div>
         ) : (
@@ -77,9 +76,9 @@ export function WarningFeed({
               key={`${warning.title}-${warning.window}`}
               className={`forecast-sidebar-item border p-4 ${
                 warning.severity === 'Alert'
-                  ? 'border-rose-300 bg-rose-50'
+                  ? 'border-rose-200/80 bg-rose-50/70'
                   : warning.severity === 'Watch'
-                    ? 'border-amber-300 bg-amber-50'
+                    ? 'border-amber-200/80 bg-amber-50/70'
                     : ''
               } ${warningToneClasses(warning.severity)}`}
             >
@@ -94,25 +93,25 @@ export function WarningFeed({
               />
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-base font-semibold">
-                  <SemanticHighlight>{warning.title}</SemanticHighlight>
+                  {warning.title}
                 </p>
                 <span
                   className={`surface-chip text-xs font-semibold uppercase tracking-[0.16em] ${
                     warning.severity === 'Alert'
-                      ? 'border-rose-200/80 bg-rose-500/18 text-rose-800'
+                      ? 'border-rose-200/80 bg-rose-50/85 text-rose-800'
                       : warning.severity === 'Watch'
-                        ? 'border-amber-200/80 bg-amber-400/18 text-amber-800'
-                        : 'border-sky-200/80 bg-sky-500/14 text-sky-800'
+                        ? 'border-amber-200/80 bg-amber-50/85 text-amber-800'
+                        : 'border-sky-200/80 bg-sky-50/85 text-sky-800'
                   }`}
                 >
                   {translateSeverity(warning.severity, locale)}
                 </span>
               </div>
               <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-current/70">
-                <SemanticHighlight>{warning.window}</SemanticHighlight>
+                {warning.window}
               </p>
               <p className="mt-3 text-sm leading-7 text-current/85">
-                <SemanticHighlight>{warning.message}</SemanticHighlight>
+                {warning.message}
               </p>
             </article>
           ))

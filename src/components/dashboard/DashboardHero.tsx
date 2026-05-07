@@ -56,9 +56,9 @@ export function DashboardHero({
       : snapshot.warnings[0]?.severity ?? null
   const warningCardClasses =
     strongestWarningSeverity === 'Alert'
-      ? 'border-rose-300 bg-rose-50'
+      ? 'border-rose-200/80 bg-rose-50/70'
       : strongestWarningSeverity === 'Watch'
-        ? 'border-amber-300 bg-amber-50'
+        ? 'border-amber-200/80 bg-amber-50/70'
         : ''
   const warningAccentClasses =
     strongestWarningSeverity === 'Alert'
@@ -68,17 +68,17 @@ export function DashboardHero({
         : 'bg-sky-500'
   const warningChipClasses =
     strongestWarningSeverity === 'Alert'
-      ? 'border-rose-200/80 bg-rose-500/18 text-rose-800'
+      ? 'border-rose-200/80 bg-rose-50/85 text-rose-800'
       : strongestWarningSeverity === 'Watch'
-        ? 'border-amber-200/80 bg-amber-400/18 text-amber-800'
-        : 'border-sky-200/80 bg-sky-500/14 text-sky-800'
+        ? 'border-amber-200/80 bg-amber-50/85 text-amber-800'
+        : 'border-sky-200/80 bg-sky-50/85 text-sky-800'
   const warningSummaryTextClasses =
     strongestWarningSeverity === 'Alert'
       ? 'text-rose-900'
       : strongestWarningSeverity === 'Watch'
         ? 'text-amber-900'
         : snapshot.warnings.length === 0
-          ? 'text-emerald-800'
+          ? 'text-teal-800'
           : 'text-sky-900'
   const warningChipLabel = strongestWarningSeverity
     ? translateSeverity(strongestWarningSeverity, locale)
@@ -105,18 +105,16 @@ export function DashboardHero({
               className="min-w-0"
             >
               <p className="text-sm font-semibold uppercase tracking-[0.28em] text-sky-700/80">
-                <SemanticHighlight>{weatherAccent(currentSummary, locale)}</SemanticHighlight>
+                {weatherAccent(currentSummary, locale)}
               </p>
               <div className="hero-current-row mt-3 flex flex-col gap-5 sm:flex-row sm:items-start">
                 <div className="hero-temperature-block shrink-0">
                   <TemperatureDisplay value={heroTemperature} className="text-sky-700" />
                 </div>
                 <div className="hero-copy-block min-w-0 pt-0 sm:pt-4">
-                  <p className="text-lg font-semibold text-slate-900">
-                    <SemanticHighlight>{currentSummary}</SemanticHighlight>
-                  </p>
+                  <p className="text-lg font-semibold text-slate-900">{currentSummary}</p>
                   <p className="mt-2 text-sm leading-7 text-slate-600">
-                    <SemanticHighlight>{snapshot.overview}</SemanticHighlight>
+                    {snapshot.overview}
                   </p>
                 </div>
               </div>
@@ -162,10 +160,10 @@ export function DashboardHero({
           </div>
 
           <p className="mt-5 text-lg font-semibold text-slate-900">
-            <SemanticHighlight>{snapshot.hikeTip.title}</SemanticHighlight>
+            {snapshot.hikeTip.title}
           </p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            <SemanticHighlight>{snapshot.hikeTip.reason}</SemanticHighlight>
+            {snapshot.hikeTip.reason}
           </p>
         </div>
       </div>
@@ -191,7 +189,7 @@ export function DashboardHero({
             {translateAirBand(snapshot.airBand, locale)}
           </span>
           <p className="mt-4 text-sm leading-7 text-slate-600">
-            <SemanticHighlight>{statusCopy(snapshot.airBand, locale)}</SemanticHighlight>
+            {statusCopy(snapshot.airBand, locale)}
           </p>
         </article>
 
@@ -202,7 +200,7 @@ export function DashboardHero({
                 {copy.hero.rainWindow}
               </p>
               <p className={`mt-3 text-xl font-semibold sm:text-2xl ${forecastSummaryClasses(snapshot.nextRainWindow, rainChance)}`}>
-                <SemanticHighlight>{snapshot.nextRainWindow}</SemanticHighlight>
+                {snapshot.nextRainWindow}
               </p>
             </div>
             <span className="icon-pill shrink-0">
@@ -210,7 +208,7 @@ export function DashboardHero({
             </span>
           </div>
           <p className="mt-4 text-sm leading-7 text-slate-600">
-            <SemanticHighlight>{copy.hero.rainNarrative(rainChance, humidity)}</SemanticHighlight>
+            {copy.hero.rainNarrative(rainChance, humidity)}
             <span className={`surface-chip ml-1 inline-flex border px-2 py-0.5 text-xs font-bold ${rainChanceClasses(rainChance)}`}>
               {rainChance}%
             </span>
@@ -238,7 +236,7 @@ export function DashboardHero({
             {warningChipLabel}
           </span>
           <p className="mt-4 text-sm leading-7 text-slate-600">
-            <SemanticHighlight>{snapshot.warnings[0]?.title ?? copy.hero.noWarning}</SemanticHighlight>
+            {snapshot.warnings[0]?.title ?? copy.hero.noWarning}
           </p>
         </article>
       </div>

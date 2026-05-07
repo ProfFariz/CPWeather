@@ -1,5 +1,6 @@
 import {
   BarElement,
+  BarController,
   CategoryScale,
   Chart as ChartJS,
   type ChartData,
@@ -7,6 +8,7 @@ import {
   Filler,
   Legend,
   LineElement,
+  LineController,
   LinearScale,
   PointElement,
   Tooltip,
@@ -17,13 +19,14 @@ import { type ForecastDay } from '../../shared/dashboard.ts'
 import { getDashboardCopy, type AppLocale } from '../../i18n/dashboard.ts'
 import { formatForecastLabel } from './display.ts'
 import { ChartIcon } from './icons.tsx'
-import { SemanticHighlight } from './SemanticHighlight.tsx'
 
 ChartJS.register(
+  BarController,
   BarElement,
   CategoryScale,
   LinearScale,
   PointElement,
+  LineController,
   LineElement,
   Filler,
   Tooltip,
@@ -305,13 +308,13 @@ export function ForecastTrendChart({
                 {copy.chart.eyebrow}
               </p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-                <SemanticHighlight>{copy.chart.title(selectedLocationLabel)}</SemanticHighlight>
+                {copy.chart.title(selectedLocationLabel)}
               </h2>
             </div>
           </div>
         </div>
         <p className="max-w-sm text-sm leading-7 text-slate-600">
-          <SemanticHighlight>{copy.chart.description}</SemanticHighlight>
+          {copy.chart.description}
         </p>
       </div>
 

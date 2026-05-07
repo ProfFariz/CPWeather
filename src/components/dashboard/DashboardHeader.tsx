@@ -17,6 +17,7 @@ import {
 import { cacheStatusClasses } from './display.ts'
 import {
   BrandWeatherLogo,
+  BrandWordmark,
   CheckIcon,
   ChevronDownIcon,
   ClockIcon,
@@ -85,8 +86,8 @@ export function DashboardHeader({
             <BrandWeatherLogo />
           </span>
           <div className="min-w-0">
-            <h1 className="truncate text-3xl font-semibold tracking-tight text-slate-900">
-              {copy.header.brand}
+            <h1 className="min-w-0" aria-label={copy.header.brand}>
+              <BrandWordmark className="h-[2.55rem] w-[12.75rem] max-w-full" />
             </h1>
             <p className="truncate text-base font-medium text-slate-500">
               {copy.header.subtitle}

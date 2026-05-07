@@ -19,7 +19,6 @@ import { DashboardInitialErrorState } from './components/dashboard/DashboardInit
 import { DashboardLoadingState } from './components/dashboard/DashboardLoadingState.tsx'
 import { ForecastSidebar } from './components/dashboard/ForecastSidebar.tsx'
 import { ForecastTrendChart } from './components/dashboard/ForecastTrendChart.tsx'
-import { SemanticHighlight } from './components/dashboard/SemanticHighlight.tsx'
 import { ShaderGradientBackground } from './components/dashboard/ShaderGradientBackground.tsx'
 import { WarningFeed } from './components/dashboard/WarningFeed.tsx'
 
@@ -91,10 +90,10 @@ function App() {
           <div className="glass-panel mb-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-700">
-                <SemanticHighlight>{copy.banner.lastFetchWarning}</SemanticHighlight>
+                {copy.banner.lastFetchWarning}
               </p>
               <p className="mt-2 text-sm font-medium text-slate-700">
-                <SemanticHighlight>{error}</SemanticHighlight>
+                {error}
               </p>
             </div>
             <button type="button" onClick={refresh} className="secondary-button">
@@ -134,11 +133,9 @@ function App() {
         </section>
 
         <footer className="mt-6 px-4 text-center text-xs font-semibold uppercase leading-6 tracking-[0.22em] text-sky-700/75">
-          <SemanticHighlight>{copy.footer.servedAt}</SemanticHighlight>{' '}
-          {formatFooterTime(payload.meta.servedAt, locale)} -{' '}
-          <SemanticHighlight>{copy.footer.apiCacheTtl}</SemanticHighlight> {payload.meta.cacheTtlMinutes}{' '}
-          {copy.common.minutes} - <SemanticHighlight>{copy.footer.localCache}</SemanticHighlight>{' '}
-          {DASHBOARD_CACHE_TTL_MINUTES} {copy.common.minutes}
+          {copy.footer.servedAt} {formatFooterTime(payload.meta.servedAt, locale)} -{' '}
+          {copy.footer.apiCacheTtl} {payload.meta.cacheTtlMinutes} {copy.common.minutes} -{' '}
+          {copy.footer.localCache} {DASHBOARD_CACHE_TTL_MINUTES} {copy.common.minutes}
         </footer>
       </div>
     </div>

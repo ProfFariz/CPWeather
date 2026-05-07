@@ -28,6 +28,7 @@ import {
   WeatherIcon,
 } from './icons.tsx'
 import { SemanticHighlight } from './SemanticHighlight.tsx'
+import { NatureDecor } from './NatureDecor.tsx'
 import { TemperatureDisplay } from './TemperatureDisplay.tsx'
 
 type DashboardHeroProps = {
@@ -88,6 +89,7 @@ export function DashboardHero({
 
   return (
     <section className="command-hero surface-panel min-w-0 overflow-hidden p-6 sm:p-10">
+      <NatureDecor variant="hero-leaves" />
       <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_17rem] md:items-start lg:gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">

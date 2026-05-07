@@ -7,6 +7,7 @@ import {
 } from '../../i18n/dashboard.ts'
 import { forecastSummaryClasses, rainChanceClasses } from './display.ts'
 import { WeatherIcon } from './icons.tsx'
+import { NatureDecor } from './NatureDecor.tsx'
 
 type ForecastSidebarProps = {
   selectedLocationLabel: string
@@ -27,6 +28,7 @@ export function ForecastSidebar({
 
   return (
     <aside className="forecast-rail surface-panel min-w-0 p-5 sm:p-6">
+      <NatureDecor variant="sidebar-droplets" />
       <div className="flex items-start gap-3">
         <span className="icon-pill shrink-0">
           <WeatherIcon />
